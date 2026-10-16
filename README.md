@@ -74,6 +74,10 @@ Onderin vijf tabbladen: **Home · Catalog · Collection · Events · More**. Ond
 
 **Android**: open de map `android/` in Android Studio en druk op Run, of bouw vanaf de commandoregel met `./gradlew assembleRelease`.
 
+## Wijzigingen
+
+Alle wijzigingen per build staan in [CHANGELOG.md](CHANGELOG.md).
+
 ## Goed om te weten
 
 - Beheerderstools (event-editor, kaartbeheer) staan alleen op de website.

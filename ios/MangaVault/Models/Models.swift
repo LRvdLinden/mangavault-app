@@ -100,7 +100,11 @@ struct CollectionItem: Codable, Identifiable, Hashable {
     var chapter: Int { Int(current_chapter ?? 0) }
     var hasNotes: Bool { !(notes ?? "").trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
     var displayCover: String? { nonEmpty(volume_cover_url) ?? nonEmpty(cover_image_url) }
-    var volumeLabel: String { isOmnibus ? (nonEmpty(volumes_included) ?? "Omnibus") : "Vol. \(volume.map(String.init) ?? "")" }
+    var volumeLabel: String {
+        if isOmnibus { return nonEmpty(volumes_included) ?? "Omnibus" }
+        let v: String = volume.map { String($0) } ?? ""
+        return "Vol. \(v)"
+    }
     var titleText: String { title ?? "" }
 }
 
@@ -123,7 +127,11 @@ struct WishlistItem: Codable, Identifiable, Hashable {
     var isOmnibus: Bool { edition == "omnibus" }
     var volume: Int? { volume_number.map { Int($0) } }
     var displayCover: String? { nonEmpty(volume_cover_url) ?? nonEmpty(cover_image_url) }
-    var volumeLabel: String { isOmnibus ? (nonEmpty(volumes_included) ?? "Omnibus") : "Vol. \(volume.map(String.init) ?? "")" }
+    var volumeLabel: String {
+        if isOmnibus { return nonEmpty(volumes_included) ?? "Omnibus" }
+        let v: String = volume.map { String($0) } ?? ""
+        return "Vol. \(v)"
+    }
 }
 
 struct ReadingActivity: Codable, Identifiable, Hashable {
@@ -371,7 +379,9 @@ enum ServerDate {
             let tail = s[s.index(after: dot)...]
             let digits = tail.prefix { $0.isNumber }
             let rest = tail.dropFirst(digits.count)
-            let trimmed = String(s[..<dot]) + "." + String(digits.prefix(3)) + rest
+            let head: String = String(s[..<dot])
+            let frac: String = String(digits.prefix(3))
+            let trimmed: String = head + "." + frac + String(rest)
             return isoFrac.date(from: trimmed)
         }
         return nil

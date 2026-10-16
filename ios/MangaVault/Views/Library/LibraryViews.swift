@@ -223,7 +223,10 @@ struct CalendarView: View {
     }
 
     private func cellFill(_ count: Int) -> Color {
-        if count > 0 { return Theme.primary.opacity(min(1, 0.35 + Double(count) * 0.18)) }
+        if count > 0 {
+            let level: Double = 0.35 + Double(count) * 0.18
+            return Theme.primary.opacity(min(1.0, level))
+        }
         return Theme.secondary.opacity(0.5)
     }
 
@@ -282,8 +285,9 @@ struct CalendarView: View {
     }
 
     private func yearBar(label: String, count: Int, maxCount: Int) -> some View {
-        let ratio = Double(count) / Double(maxCount)
-        let opacity = count > 0 ? 0.2 + 0.8 * ratio : 0.08
+        let ratio: Double = Double(count) / Double(maxCount)
+        let scaled: Double = 0.2 + 0.8 * ratio
+        let opacity: Double = count > 0 ? scaled : 0.08
         return VStack(spacing: 4) {
             Text("\(count)").font(.system(size: 9, weight: .bold)).foregroundStyle(Theme.muted)
             RoundedRectangle(cornerRadius: 4)
@@ -1342,6 +1346,15 @@ struct CompareView: View {
         }
     }
 
+    private func statText(_ s: LVCompareStats?, _ dash: String, _ f: (LVCompareStats) -> String) -> String {
+        guard let s else { return dash }
+        return f(s)
+    }
+
+    private func favoriteText(_ s: LVCompareStats) -> String {
+        s.favorite ? "Yes" : "No"
+    }
+
     private func avgText(_ s: LVCompareStats?) -> String {
         guard let s else { return "…" }
         if let avg = s.avgRating { return String(format: "%.1f/10", avg) }
@@ -1354,11 +1367,11 @@ struct CompareView: View {
         return SectionCard(title: "Your personal stats") {
             VStack(spacing: 0) {
                 headerRow(a, b)
-                row("Owned Volumes", sa.map { "\($0.owned)" } ?? dash, sb.map { "\($0.owned)" } ?? dash)
-                row("Read Volumes", sa.map { "\($0.read)" } ?? dash, sb.map { "\($0.read)" } ?? dash)
-                row("On Wishlist", sa.map { "\($0.wishlist)" } ?? dash, sb.map { "\($0.wishlist)" } ?? dash)
+                row("Owned Volumes", statText(sa, dash) { String($0.owned) }, statText(sb, dash) { String($0.owned) })
+                row("Read Volumes", statText(sa, dash) { String($0.read) }, statText(sb, dash) { String($0.read) })
+                row("On Wishlist", statText(sa, dash) { String($0.wishlist) }, statText(sb, dash) { String($0.wishlist) })
                 row("Your Avg Rating", avgText(sa), avgText(sb))
-                row("Favorite", sa.map { $0.favorite ? "Yes" : "No" } ?? dash, sb.map { $0.favorite ? "Yes" : "No" } ?? dash)
+                row("Favorite", statText(sa, dash, favoriteText), statText(sb, dash, favoriteText))
             }
         }
     }
@@ -1373,8 +1386,10 @@ struct CompareView: View {
         let rated = items.compactMap { $0.rating }.filter { $0 > 0 }
         var avg: Double? = nil
         if !rated.isEmpty {
-            let raw = rated.reduce(0, +) / Double(rated.count)
-            avg = (raw * 10).rounded() / 10
+            let sum: Double = rated.reduce(0.0, +)
+            let raw: Double = sum / Double(rated.count)
+            let tenths: Double = (raw * 10).rounded()
+            avg = tenths / 10
         }
         return LVCompareStats(owned: owned, read: read, favorite: fav, avgRating: avg, wishlist: wish.count)
     }
@@ -1499,8 +1514,16 @@ fileprivate struct LVSeries: Identifiable {
     let read: Int
     let total: Int
 
-    var pct: Double? { total > 0 ? min(100, Double(owned) / Double(total) * 100) : nil }
-    var readPct: Double { owned > 0 ? min(100, Double(read) / Double(owned) * 100) : 0 }
+    var pct: Double? {
+        guard total > 0 else { return nil }
+        let ratio: Double = Double(owned) / Double(total)
+        return min(100.0, ratio * 100.0)
+    }
+    var readPct: Double {
+        guard owned > 0 else { return 0 }
+        let ratio: Double = Double(read) / Double(owned)
+        return min(100.0, ratio * 100.0)
+    }
     var allRead: Bool { owned > 0 && read == owned }
     var unread: Int { max(0, owned - read) }
 }
@@ -2329,7 +2352,7 @@ fileprivate struct LVWheel: View {
     }
 
     private func label(_ i: Int, seg: Double, r: CGFloat) -> some View {
-        let mid = Double(i) * seg + seg / 2
+        let mid: Double = Double(i) * seg + seg / 2.0
         let fontSize: CGFloat = titles.count > 20 ? 7 : 9
         return Text(Self.short(titles[i]))
             .font(.system(size: fontSize, weight: .bold))
@@ -2548,9 +2571,11 @@ struct RouletteView: View {
             while idx == last { idx = Int.random(in: 0..<n) }
         }
         lastIndex = idx
-        let seg = 360.0 / Double(n)
-        let base = (rotation / 360).rounded(.up) * 360
-        let target = base + 2160 - (Double(idx) * seg + seg / 2)
+        let seg: Double = 360.0 / Double(n)
+        let turns: Double = (rotation / 360.0).rounded(.up)
+        let base: Double = turns * 360.0
+        let center: Double = Double(idx) * seg + seg / 2.0
+        let target: Double = base + 2160.0 - center
         let chosen = list[idx]
         spinning = true
         result = nil

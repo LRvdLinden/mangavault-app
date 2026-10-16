@@ -85,6 +85,25 @@ struct CollectionView: View {
         ("owned_asc", "Owned Volumes ↑"), ("owned_desc", "Owned Volumes ↓"), ("total_asc", "Total Volumes ↑"), ("total_desc", "Total Volumes ↓")
     ]
 
+    private static func searchFields(_ i: CollectionItem) -> [String] {
+        var fields: [String] = [i.titleText]
+        fields.append(i.publisher ?? "")
+        fields.append(i.notes ?? "")
+        fields.append(i.volumes_included ?? "")
+        if let v = i.volume { fields.append("vol \(v)") } else { fields.append("") }
+        return fields
+    }
+
+    private static func titleOrder(_ a: CollectionItem, _ b: CollectionItem) -> Bool {
+        let c: ComparisonResult = a.titleText.localizedCompare(b.titleText)
+        if c == .orderedSame {
+            let va: Int = a.volume ?? 0
+            let vb: Int = b.volume ?? 0
+            return va < vb
+        }
+        return c == .orderedAscending
+    }
+
     private static func genres(_ g: String?) -> [String] {
         (g ?? "").split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces).lowercased() }.filter { !$0.isEmpty }
     }
@@ -108,8 +127,7 @@ struct CollectionView: View {
         let q = search.trimmingCharacters(in: .whitespaces).lowercased()
         var r = items.filter { i in
             guard !q.isEmpty else { return true }
-            let fields: [String] = [i.titleText, i.publisher ?? "", i.notes ?? "", i.volumes_included ?? "", i.volume.map { "vol \($0)" } ?? ""]
-            return fields.contains { $0.lowercased().contains(q) }
+            return Self.searchFields(i).contains { $0.lowercased().contains(q) }
         }
         if let statusFilter { r = r.filter { $0.effectiveStatus == statusFilter } }
         if favoritesOnly { r = r.filter { $0.isFavorite } }
@@ -145,10 +163,7 @@ struct CollectionView: View {
         case "updated":
             let stamp: (CollectionItem) -> String = { i in i.last_read_date ?? i.updated_date ?? "" }
             r.sort { stamp($0) > stamp($1) }
-        case "title": r.sort { a, b in
-            let c = a.titleText.localizedCompare(b.titleText)
-            return c == .orderedSame ? (a.volume ?? 0) < (b.volume ?? 0) : c == .orderedAscending
-        }
+        case "title": r.sort(by: Self.titleOrder)
         case "title_desc": r.sort { $0.titleText.localizedCompare($1.titleText) == .orderedDescending }
         case "progress": r.sort { $0.chapter > $1.chapter }
         case "rating": r.sort { ($0.rating ?? 0) > ($1.rating ?? 0) }
@@ -211,9 +226,10 @@ struct CollectionView: View {
 
     private var stats: some View {
         let completed = items.filter { $0.effectiveStatus == .completed }.count
-        let value = items.reduce(0.0) { $0 + ($1.price ?? 0) }
-        let rated = items.filter { ($0.rating ?? 0) > 0 }
-        let avg = rated.isEmpty ? "—" : String(format: "%.1f", rated.reduce(0.0) { $0 + ($1.rating ?? 0) } / Double(rated.count))
+        let value: Double = items.reduce(0.0) { (sum: Double, i: CollectionItem) -> Double in sum + (i.price ?? 0) }
+        let rated: [CollectionItem] = items.filter { ($0.rating ?? 0) > 0 }
+        let ratingSum: Double = rated.reduce(0.0) { (sum: Double, i: CollectionItem) -> Double in sum + (i.rating ?? 0) }
+        let avg: String = rated.isEmpty ? "—" : String(format: "%.1f", ratingSum / Double(rated.count))
         return LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
             StatCard(icon: "books.vertical", label: "Volumes", value: "\(items.count)")
             StatCard(icon: "checkmark.circle", label: "Completed", value: "\(completed)", accent: Theme.emerald)
@@ -243,7 +259,7 @@ struct CollectionView: View {
                         Text("Not rated").tag("unrated")
                         ForEach([5, 4, 3, 2, 1], id: \.self) { n in Text(n == 5 ? "5 stars" : "\(n)+ stars").tag(String(n * 2)) }
                     }
-                } label: { filterPill(ratingFilter == "all" ? "Any rating" : (ratingFilter == "unrated" ? "Not rated" : "\((Int(ratingFilter) ?? 0) / 2)+ stars"), active: ratingFilter != "all") }
+                } label: { filterPill(ratingLabel, active: ratingFilter != "all") }
                 Menu {
                     Picker("Progress", selection: $progressFilter) {
                         Text("Any progress").tag("all")
@@ -269,6 +285,13 @@ struct CollectionView: View {
                 }
             }
         }
+    }
+
+    private var ratingLabel: String {
+        if ratingFilter == "all" { return "Any rating" }
+        if ratingFilter == "unrated" { return "Not rated" }
+        let stars: Int = (Int(ratingFilter) ?? 0) / 2
+        return "\(stars)+ stars"
     }
 
     private var progressLabel: String {
@@ -303,7 +326,9 @@ struct CollectionView: View {
         var map: [String: SeriesRow] = [:]
         for i in items {
             guard let mid = i.manga_id else { continue }
-            var row = map[mid] ?? SeriesRow(id: mid, title: i.titleText, total: mangaInfo[mid]?.total ?? Int(i.total_volumes ?? 0))
+            let fallbackTotal: Int = Int(i.total_volumes ?? 0)
+            let knownTotal: Int = mangaInfo[mid]?.total ?? fallbackTotal
+            var row: SeriesRow = map[mid] ?? SeriesRow(id: mid, title: i.titleText, total: knownTotal)
             row.owned += 1
             if i.effectiveStatus == .completed { row.read += 1 }
             if i.effectiveStatus == .reading, (i.volume ?? 0) > row.current { row.current = i.volume ?? 0 }
@@ -324,7 +349,8 @@ struct CollectionView: View {
     private func seriesFooter(_ r: SeriesRow) -> String {
         var s: String
         if r.total > 0 {
-            let pct = min(100, Int((Double(r.read) / Double(r.total) * 100).rounded()))
+            let ratio: Double = Double(r.read) / Double(r.total)
+            let pct: Int = min(100, Int((ratio * 100).rounded()))
             s = "\(pct)% complete"
         } else {
             s = "\(r.read) volumes read"
@@ -480,6 +506,13 @@ struct CollectionView: View {
         Button(role: .destructive) { Task { await remove(item) } } label: { Label("Remove", systemImage: "trash") }
     }
 
+    private func listSubtitle(_ item: CollectionItem) -> String {
+        let price: String = (item.price ?? 0).euro
+        var s: String = "\(item.volumeLabel) · \(price)"
+        if item.chapter > 0 { s += " · Ch. \(item.chapter)" }
+        return s
+    }
+
     private func listRow(_ item: CollectionItem) -> some View {
         let st = item.effectiveStatus
         return HStack(spacing: 12) {
@@ -489,7 +522,7 @@ struct CollectionView: View {
             .buttonStyle(.plain)
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.titleText).font(.subheadline.weight(.bold)).lineLimit(1)
-                Text("\(item.volumeLabel) · \((item.price ?? 0).euro)\(item.chapter > 0 ? " · Ch. \(item.chapter)" : "")")
+                Text(listSubtitle(item))
                     .font(.caption).foregroundStyle(Theme.muted)
                 HStack(spacing: 8) {
                     Text(st.label).font(.system(size: 10, weight: .black)).foregroundStyle(Theme.statusColor(st))

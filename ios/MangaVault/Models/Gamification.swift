@@ -9,8 +9,16 @@ struct LevelInfo: Hashable {
     let next: Int
     let total: Int
 
-    var progress: Double { span > 0 ? min(1, Double(into) / Double(span)) : 1 }
-    var percent: Int { span > 0 ? Int((Double(into) / Double(span) * 100).rounded()) : 100 }
+    var progress: Double {
+        guard span > 0 else { return 1 }
+        let ratio: Double = Double(into) / Double(span)
+        return min(1.0, ratio)
+    }
+    var percent: Int {
+        guard span > 0 else { return 100 }
+        let ratio: Double = Double(into) / Double(span)
+        return Int((ratio * 100).rounded())
+    }
 }
 
 enum XP {
@@ -30,7 +38,13 @@ enum XP {
         let rated = items.filter { ($0.rating ?? 0) > 0 }.count
         let favs = items.filter { $0.isFavorite }.count
         let notes = items.filter { $0.hasNotes }.count
-        return n * 10 + completed * 30 + rated * 15 + favs * 5 + notes * 8 + max(0, genres) * 20
+        let volumeXP: Int = n * 10
+        let completedXP: Int = completed * 30
+        let ratedXP: Int = rated * 15
+        let favoriteXP: Int = favs * 5
+        let notesXP: Int = notes * 8
+        let genreXP: Int = max(0, genres) * 20
+        return volumeXP + completedXP + ratedXP + favoriteXP + notesXP + genreXP
     }
 }
 
@@ -91,7 +105,11 @@ struct AchievementEval: Identifiable {
     let unlocked: Bool
     var id: String { def.id }
     var total: Int { def.total }
-    var percent: Int { total > 0 ? min(100, Int((Double(value) / Double(total) * 100).rounded())) : 0 }
+    var percent: Int {
+        guard total > 0 else { return 0 }
+        let ratio: Double = Double(value) / Double(total)
+        return min(100, Int((ratio * 100).rounded()))
+    }
 
     static func evaluate(_ stats: AchievementStats) -> [AchievementEval] {
         AchievementDef.all.map { def in
@@ -132,7 +150,11 @@ struct QuestState: Identifiable, Hashable {
     var serverCompleted: Bool? = nil
     var id: String { def.id }
     var completed: Bool { serverCompleted ?? (value >= def.total) }
-    var percent: Int { def.total > 0 ? min(100, Int((Double(value) / Double(def.total) * 100).rounded())) : 0 }
+    var percent: Int {
+        guard def.total > 0 else { return 0 }
+        let ratio: Double = Double(value) / Double(def.total)
+        return min(100, Int((ratio * 100).rounded()))
+    }
 }
 
 enum DayKey {
