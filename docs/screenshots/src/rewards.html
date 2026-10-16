@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<title>Rewards – RewardsView</title>
+<link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body><script>
+// RewardsView (Views/Rewards/RewardsEventsViews.swift), opened from More › Rewards. Daily reward not claimed yet.
+const { icon, header, progress } = MV;
+const LEVELS = [
+  [5, "Common Vault Capsule", true], [10, "Rare Vault Capsule", true], [15, "Epic Vault Capsule", false],
+  [20, "Legendary Vault Capsule", false], [25, "Exclusive profile banner", false],
+];
+const levelRow = ([lv, label, un]) => `<div class="hstack" style="gap:12px;padding:10px;border-radius:10px;background:${un ? "rgba(255,122,0,.1)" : "rgba(34,34,34,.5)"};${un ? "box-shadow:inset 0 0 0 1px rgba(255,122,0,.4)" : ""}">
+  <span style="width:22px;display:flex;justify-content:center;color:${un ? "var(--primary)" : "var(--muted)"}">${icon(un ? "checkmark.circle.fill" : "lock.fill", "", "width:18px;height:18px")}</span>
+  <div class="vstack" style="gap:1px"><span class="c1 w9" style="color:${un ? "var(--primary)" : "var(--muted)"}">Level ${lv}</span><span class="sub w7" style="color:${un ? "var(--fg)" : "var(--muted)"}">${label}</span></div>
+</div>`;
+const content = `<div class="pad vstack" style="gap:18px">
+  ${header({ eyebrow: "Rewards", eyebrowIcon: "gift.fill", lead: "MY", accent: "REWARDS", subtitle: "Daily rewards, level rewards and everything you earned." })}
+  <div class="card hi vstack" style="padding:16px;gap:12px">
+    <div class="rvtitle">${icon("calendar.badge.plus")}Daily Reward</div>
+    <div class="hstack" style="align-items:flex-end">
+      <div class="vstack" style="gap:2px"><span class="hl w9">Streak: 9 days</span><span class="sub w7 pri">+45 XP + Capsule</span></div>
+      <span class="spacer"></span>${icon("flame.fill", "", "width:30px;height:30px;color:var(--orange)")}
+    </div>
+    <div class="btn primary">Claim Daily Reward</div>
+    <div class="c1 muted">A new day starts at 00:00 Amsterdam time. Missing a day only resets the streak bonus.</div>
+  </div>
+  <div class="card vstack" style="padding:16px;gap:12px">
+    <div class="rvtitle">${icon("star.circle.fill")}Level Rewards</div>
+    <div class="sub w7 muted">You are level 12 · 640/1200 XP to next level</div>
+    ${progress(640 / 1200)}
+    ${LEVELS.map(levelRow).join("")}
+    <div class="sub w7 pri">Open unlocked capsules →</div>
+  </div>
+</div>`;
+MV.screen({ nav: { back: "More", title: "Rewards" }, tab: "more", moreBadge: 2, scroll: 0, content });
+</script></body></html>

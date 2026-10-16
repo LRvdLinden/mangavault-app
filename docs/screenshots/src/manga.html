@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<title>Manga – MangaDetailView</title>
+<link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body><script>
+// MangaDetailView (Views/Catalog/MangaDetailView.swift), pushed from the Catalog tab.
+const { icon, cover, badge, progress } = MV;
+const M = { title: "Jujutsu Kaisen", total: 30, price: 8.99, publisher: "Shueisha" };
+const OWNED = new Set([1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18]);
+const WISHED = new Set([19, 20, 21]);
+function tile(v) {
+  const owned = OWNED.has(v), wished = WISHED.has(v);
+  const stroke = owned ? "inset 0 0 0 2px var(--primary)" : (wished ? "inset 0 0 0 1px rgba(239,68,68,.6)" : "inset 0 0 0 1px var(--border)");
+  const circ = (ic, active, color, fill) => `<span style="width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 0 4px rgba(0,0,0,.5)${active ? "" : `, inset 0 0 0 1px ${color}80`};background:${active ? fill : "rgba(18,18,18,.75)"};color:${active ? "#fff" : fill}">${icon(ic, "", "width:12px;height:12px")}</span>`;
+  return `<div style="position:relative">
+    <div class="voltile"><div class="shade">VOL. ${v}</div><div style="position:absolute;inset:0;border-radius:10px;box-shadow:${stroke}"></div></div>
+    <div style="position:absolute;top:6px;left:6px">${circ(wished ? "heart.fill" : "heart", wished, "#EF4444", "var(--red)")}</div>
+    <div style="position:absolute;top:6px;right:6px">${circ(owned ? "checkmark" : "plus", owned, "#FF7A00", "var(--primary)")}</div>
+  </div>`;
+}
+const stat = (l, v, c = "var(--fg)") => `<div class="vstack" style="gap:2px"><div class="c2 w7 trk1 muted up">${l}</div><div class="t2 w9" style="color:${c}">${v}</div></div>`;
+const content = `<div class="pad vstack" style="gap:28px">
+  <div class="vstack" style="gap:18px">
+    <div class="hstack" style="justify-content:center"><div style="box-shadow:0 10px 20px rgba(0,0,0,.6);border-radius:14px">${cover({ ...M, sj: true, width: 190, radius: 14 })}</div></div>
+    <div class="vstack" style="gap:8px">
+      <div class="hstack" style="gap:6px">${badge("SHONEN JUMP")}${badge("SHUEISHA", { fg: "var(--muted)", bg: "var(--card-solid)", ring: "var(--border)" })}</div>
+      <div style="font-size:30px;line-height:36px;font-weight:900;letter-spacing:-1px">${M.title}</div>
+      <div class="sub muted">Action, Dark Fantasy, Supernatural, School Life</div>
+      <div class="sub muted clamp4">Yuji Itadori swallows a cursed finger to save his friends and becomes host to Sukuna, the King of Curses. Enrolled at Tokyo Jujutsu High, he must find and consume the rest of Sukuna's fingers before his own execution.</div>
+    </div>
+    <div class="hstack" style="gap:28px">${stat("Volumes", "30")}${stat("Price", "€8.99", "var(--primary)")}${stat("In Collection", "18 / 30")}</div>
+    <div class="card vstack" style="padding:14px;gap:10px">
+      <div class="hstack"><span class="lbl sub w9" style="gap:8px">${icon("books.vertical", "", "color:var(--primary);width:15px;height:15px")}Series Progress</span><span class="spacer"></span><span class="c1 w7 pri">All series</span></div>
+      <div class="hstack c1" style="gap:14px">
+        <span><span class="muted">Owned: </span><b>18 / 30</b></span>
+        <span class="lbl" style="gap:2px">${icon("checkmark.circle", "", "color:var(--emerald);width:12px;height:12px")}<span><span class="muted"> Read: </span><b>14</b></span></span>
+        <span><span class="muted">Unread: </span><b>4</b></span>
+      </div>
+      ${progress(0.6, 6)}
+      ${progress(0.78, 6, "var(--emerald)", "rgba(16,185,129,.5)")}
+      <div class="hstack c2 w7 muted"><span>Collection 60%</span><span class="spacer"></span><span>Read 78%</span></div>
+    </div>
+    <div class="lbl c1 muted">${icon("book")}Add the volumes you own below · tap the heart to save to your wishlist.</div>
+  </div>
+  <div class="vstack" style="gap:14px">
+    <div class="hstack" style="gap:8px">${icon("book.fill", "", "color:var(--primary);width:18px;height:18px")}<span class="t3 w9">ALL VOLUMES</span></div>
+    <div class="fn w7 muted">18 of 30 in collection · 3 on wishlist</div>
+    <div style="display:grid;grid-template-columns:repeat(3, 1fr);gap:14px 12px">${Array.from({ length: 30 }, (_, i) => tile(i + 1)).join("")}</div>
+  </div>
+</div>`;
+MV.screen({
+  nav: { back: "Catalog", title: M.title, trailing: icon("square.and.arrow.up", "navicon") },
+  tab: "catalog", moreBadge: 2, scroll: 72, content,
+});
+</script></body></html>

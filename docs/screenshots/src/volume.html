@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<title>Volume – VolumeDetailView</title>
+<link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body><script>
+// VolumeDetailView (Views/Catalog/VolumeDetailView.swift) for Chainsaw Man Vol. 14, owned and "Reading".
+// No volume cover URL → the view's own "Cover not available" placeholder.
+const { icon, badge } = MV;
+const card = (ic, title, body) => `<div class="card vstack" style="padding:18px;gap:10px">
+  <div class="lbl hl w9 up" style="gap:8px">${icon(ic, "", "color:var(--primary);width:15px;height:15px")}${title}</div>${body}</div>`;
+const ov = (l, v) => `<div class="vstack" style="gap:2px"><div class="c2 w7 trk1 muted up">${l}</div><div class="sub w7">${v}</div></div>`;
+const content = `<div class="pad vstack" style="gap:20px">
+  <div class="vstack" style="gap:16px">
+    <div class="hstack" style="justify-content:center">
+      <div style="width:190px;aspect-ratio:2/3;border-radius:14px;overflow:hidden;position:relative;box-shadow:0 10px 20px rgba(0,0,0,.6), inset 0 0 0 1px var(--border);background:linear-gradient(to bottom right, rgba(255,122,0,.3), var(--bg))">
+        <div class="vstack" style="position:absolute;inset:0;align-items:center;justify-content:center;gap:6px">
+          ${icon("book", "", "width:36px;height:36px;color:rgba(255,122,0,.6)")}
+          <div class="c1 w9 muted">VOL. 14</div><div class="c2" style="color:rgba(163,163,163,.7)">Cover not available</div>
+        </div>
+      </div>
+    </div>
+    <div class="hstack" style="gap:6px">${badge("SHONEN JUMP")}${badge("SHUEISHA", { fg: "var(--muted)", bg: "var(--card-solid)", ring: "var(--border)" })}${badge("READING")}</div>
+    <div style="font-size:28px;line-height:34px;font-weight:900;letter-spacing:-1px">Chainsaw Man</div>
+    <div class="sub w9 trk2 pri">VOLUME 14</div>
+    <div class="sub muted">Action, Dark Fantasy, Horror, Comedy</div>
+    <div class="hstack" style="gap:10px">
+      <div class="btn secondary" style="flex:0 1 auto;min-width:0;white-space:normal;padding:0 14px">${icon("checkmark.circle")}In Collection</div>
+      <div class="hstack sub w7" style="gap:4px;min-height:44px;padding:0 12px;border-radius:10px;background:var(--card-solid);box-shadow:inset 0 0 0 1px var(--border)">Reading${icon("chevron.down", "", "width:11px;height:11px")}</div>
+      <div class="btn outline" style="flex:0 1 auto;min-width:0;padding:0 14px">${icon("heart")}Wishlist</div>
+    </div>
+    <div class="lbl sub w6 pri">${icon("slider.horizontal.3", "", "width:17px;height:17px")}Rating, progress &amp; notes</div>
+    <div class="hstack sub w7 pri" style="align-self:flex-start;gap:6px;min-height:40px;padding:0 14px;border-radius:10px;background:rgba(255,122,0,.1);box-shadow:inset 0 0 0 1px rgba(255,122,0,.4)">📖 Read On MangaFire${icon("arrow.up.right.square", "", "width:16px;height:16px")}</div>
+  </div>
+  ${card("book", "What Happens", `<div class="sub muted">Denji and Asa are on the run after the Chainsaw Man Church turns the city upside down. Old allies resurface, the Falling Devil descends, and Denji has to decide what kind of hero he actually wants to be.</div>`)}
+  ${card("clock.arrow.circlepath", "Previously in the Story", `<div class="sub muted">Asa and Yoru's uneasy partnership was tested as the Public Safety Devil Hunters closed in on the church.</div>`)}
+  <div class="card vstack" style="padding:18px;gap:14px">
+    <div class="lbl hl w9" style="gap:8px">${icon("books.vertical", "", "color:var(--primary);width:15px;height:15px")}VOLUME OVERVIEW</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      ${ov("Volume", "14")}${ov("Genres", "Action, Dark Fantasy, Horror, Comedy")}${ov("Publisher", "Shueisha")}${ov("Language", "English")}
+      ${ov("Total Volumes", "20")}${ov("Chapters Included", "116–124 (9)")}${ov("Price", "€8.99")}${ov("Reading Progress", "Chapter 121")}${ov("Your Rating", "9 / 10")}
+    </div>
+  </div>
+</div>`;
+MV.screen({
+  nav: { back: "Back", title: "Volume 14" },
+  tab: "catalog", moreBadge: 2, scroll: 128, content,
+});
+</script></body></html>

@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<title>Cards – CardsView</title>
+<link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body><script>
+// CardsView (Views/Rewards/RewardsEventsViews.swift), More › Trading Cards. Cards without artwork use
+// TradingCardView's rarity gradient; locked cards show the lock placeholder. Scrolled to the filter row.
+const { icon, header, statCard, chip } = MV;
+const RAR = { common: "#9ca3af", uncommon: "#22c55e", rare: "#3b82f6", epic: "#a855f7", legendary: "#f59e0b", mythic: "#ef4444" };
+const CARDS = [
+  { t: "Straw Hat Captain", cat: "character", r: "common", n: 3 },
+  { t: "Cursed Energy Surge", cat: "technique", r: "rare", n: 1, fav: true },
+  { t: "Sorcerer Killer", cat: "character", r: "epic", n: 2 },
+  { t: "The Last Elf Mage", cat: "character", r: "legendary", n: 1, fav: true },
+  { t: "Chainsaw Heart", cat: "artifact", r: "mythic", n: 1, limited: true },
+  { t: "Kunimitsu's Blade", cat: "artifact", r: "epic", locked: true },
+];
+function tcard(c) {
+  const col = RAR[c.r], w = 128, h = w * 1.4;
+  const bg = c.locked
+    ? `background:var(--secondary)`
+    : `background:linear-gradient(to bottom right, ${col}, var(--bg))`;
+  const mid = c.locked
+    ? `<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--muted)">${icon("lock.fill", "", "width:24px;height:24px")}</div>`
+    : `<div class="vstack" style="position:absolute;inset:0;align-items:center;justify-content:center;gap:4px;color:rgba(255,255,255,.7)">${icon("photo", "", "width:26px;height:26px")}<span class="c2">No image</span></div>`;
+  const label = c.r[0].toUpperCase() + c.r.slice(1);
+  const art = `<div class="tcard" style="width:${w}px;height:${h}px;${bg};box-shadow:0 6px 10px ${col}80">
+    ${mid}
+    <div class="tin">
+      <div class="hstack" style="align-items:flex-start"><span class="rar" style="background:${col}">${label}</span><span class="spacer"></span>${c.n > 1 ? `<span class="cnt">×${c.n}</span>` : ""}</div>
+      ${c.limited ? `<span style="align-self:center;margin-top:2px;font-size:8px;font-weight:900;padding:2px 6px;border-radius:99px;background:var(--primary)">Limited Event</span>` : ""}
+      <span class="spacer"></span>
+      <div class="hstack" style="align-items:flex-end"><div class="vstack" style="gap:1px"><span class="tt">${c.t}</span><span class="cat">${c.cat[0].toUpperCase() + c.cat.slice(1)}</span></div><span class="spacer"></span>${c.fav ? icon("star.fill", "", "width:11px;height:11px;color:var(--orange)") : ""}</div>
+    </div>
+    <div class="ring" style="box-shadow:inset 0 0 0 2px ${col}"></div>
+  </div>`;
+  const favBtn = c.locked ? "" : `<div style="width:${w}px;padding:5px 0;text-align:center;font-size:10px;font-weight:700;border-radius:6px;${c.fav ? "background:var(--primary);color:#fff" : "background:var(--secondary);color:var(--muted)"}">${c.fav ? "★ Favorite" : "☆ Favorite"}</div>`;
+  return `<div class="vstack" style="gap:6px;align-items:center">${art}${favBtn}</div>`;
+}
+const content = `<div class="pad vstack" style="gap:18px">
+  ${header({ eyebrow: "Cards", eyebrowIcon: "rectangle.stack.fill", lead: "TRADING", accent: "CARDS", subtitle: "Collect manga cards by reading, completing events, and joining the community." })}
+  <div class="hstack" style="gap:10px"><div style="flex:1">${statCard("rectangle.stack", "Collected", "27/64")}</div><div style="flex:1">${statCard("chart.pie", "Complete", "42%", "var(--emerald)")}</div></div>
+  <div class="hstack" style="gap:8px">
+    <span class="chip">All rarities${icon("chevron.down", "", "width:10px;height:10px")}</span>${chip("Favorites", false, "star")}
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;column-gap:14px;row-gap:18px">${CARDS.map(tcard).join("")}</div>
+</div>`;
+MV.screen({ nav: { back: "More", title: "Trading Cards" }, tab: "more", moreBadge: 2, scroll: 236, content });
+</script></body></html>

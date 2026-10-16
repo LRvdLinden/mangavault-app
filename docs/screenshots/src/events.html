@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<title>Events – EventsView</title>
+<link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body><script>
+// EventsView (Views/Rewards/RewardsEventsViews.swift): header, EventBannerView, Active / Upcoming sections.
+const { icon, header, badge, progress, eventBanner, bell } = MV;
+const EVENT = {
+  accent: "#8B5CF6", title: "🎃 Spooky Season Reading Marathon",
+  subtitle: "Read horror & mystery manga all month and unlock the limited Halloween card.",
+  start: "2026-10-01", end: "2026-10-31", points: 340, max: 500, countdown: [15, 14, 18, 42],
+};
+const pill = (label, hex) => `<span style="font-size:10px;font-weight:900;padding:3px 8px;border-radius:4px;color:${hex};background:${hex}26;box-shadow:inset 0 0 0 1px ${hex}80">${label}</span>`;
+function eventCard(e) {
+  return `<div style="border-radius:14px;overflow:hidden;background:var(--card);box-shadow:inset 0 0 0 1px ${e.active ? e.accent + "80" : "var(--border)"}">
+    <div style="position:relative;height:130px;background:linear-gradient(to bottom right, ${e.accent}, var(--bg))">
+      <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent, rgba(0,0,0,.6))"></div>
+      <div class="hstack" style="position:absolute;left:10px;right:10px;top:10px">${badge(e.type.toUpperCase(), { bg: "rgba(0,0,0,.65)", ring: e.accent + "99" })}<span class="spacer"></span>${e.active ? badge("LIVE", { icon: "dot.radiowaves.left.and.right", bg: "var(--red)" }) : ""}</div>
+    </div>
+    <div class="vstack" style="padding:14px;gap:10px">
+      <div class="vstack" style="gap:6px">
+        <div class="hl w9">${e.title}</div>
+        <div class="c1 muted clamp4">${e.desc}</div>
+        <div class="hstack c2 w7 muted" style="gap:12px"><span class="lbl" style="gap:4px">${icon("calendar")}${e.start} → ${e.end}</span><span class="lbl" style="gap:4px">${icon("target")}${e.req}</span></div>
+        ${e.reward ? `<div class="hstack" style="gap:10px;padding:8px;border-radius:10px;background:rgba(34,34,34,.5)">
+          <div style="width:36px;height:50px;border-radius:6px;background:var(--secondary);box-shadow:inset 0 0 0 1px ${e.reward.hex};display:flex;align-items:center;justify-content:center;color:var(--muted)">${icon("photo", "", "width:14px;height:14px")}</div>
+          <div class="vstack" style="gap:3px;align-items:flex-start"><span style="font-size:9px;font-weight:900" class="muted">REWARD CARD</span><span class="c1 w7">${e.reward.title}</span>${pill(e.reward.label, e.reward.hex)}</div></div>` : ""}
+      </div>
+      <div class="sub w7" style="color:${e.accent}">View Event →</div>
+      ${e.progress != null ? `<div class="vstack" style="gap:8px">
+        <div class="hstack"><span class="c1 w7 muted">Your progress</span><span class="spacer"></span><span class="c1 w9">${e.progress}/${e.total}</span></div>
+        ${progress(e.progress / e.total, 6, e.accent, e.accent + "80")}
+        <div class="hstack" style="gap:8px"><div class="btn outline">${icon("arrow.clockwise")}Update</div><div class="btn outline">${icon("list.number")}Leaderboard</div></div>
+      </div>` : `<div class="btn primary" style="background:${e.accent}">Join Event</div>`}
+    </div>
+  </div>`;
+}
+const ACTIVE = {
+  active: true, accent: "#8B5CF6", type: "Halloween Event", title: "🎃 Spooky Season Reading Marathon",
+  desc: "Read horror and mystery manga all month long. Every chapter you log counts towards the community goal and your own reward.",
+  start: "2026-10-01", end: "2026-10-31", req: "500 chapters read", progress: 340, total: 500,
+  reward: { title: "Pumpkin Night Yoru", label: "Legendary", hex: "#f59e0b" },
+};
+const UPCOMING = {
+  accent: "#38BDF8", type: "Reading Marathon", title: "❄️ Winter Binge Week",
+  desc: "Finish as many volumes as you can between Christmas and New Year.",
+  start: "2026-12-24", end: "2026-12-31", req: "10 volumes completed",
+};
+const content = `<div class="pad vstack" style="gap:18px">
+  ${header({ eyebrow: "Events", eyebrowIcon: "calendar.badge.clock", lead: "COMMUNITY", accent: "EVENTS", subtitle: "Join reading events, track real progress, and earn exclusive trading cards." })}
+  ${eventBanner(EVENT)}
+  <div class="vstack" style="gap:18px">
+    <div class="vstack" style="gap:12px"><div class="rvtitle">${icon("bolt.fill")}Active Events</div>${eventCard(ACTIVE)}</div>
+    <div class="vstack" style="gap:12px"><div class="rvtitle">${icon("calendar")}Upcoming</div>${eventCard(UPCOMING)}</div>
+  </div>
+</div>`;
+MV.screen({ nav: { title: "Events", trailing: bell(3) }, tab: "events", moreBadge: 2, scroll: 120, content });
+</script></body></html>

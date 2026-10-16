@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<title>Collection – CollectionView</title>
+<link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body><script>
+// CollectionView (Views/Collection/CollectionView.swift) in list mode, sort "Recently Added",
+// scrolled down to the status chips so the volume rows are visible.
+const { icon, cover, chip, statCard, stars, header, statusColor, statusLabel } = MV;
+const ITEMS = [
+  { title: "Frieren: Beyond Journey's End", pub: "Shogakukan", vol: 13, price: 9.99, ch: 118, st: "reading", rating: 10, fav: true },
+  { title: "Kagurabachi", pub: "Shueisha", sj: true, vol: 5, price: 8.99, ch: 38, st: "reading", rating: 8 },
+  { title: "Vinland Saga", pub: "Kodansha", vol: 14, price: 9.99, st: "completed", rating: 9, fav: true, notes: "Thorfinn's farm arc still hits hard." },
+  { title: "Blue Lock", pub: "Kodansha", vol: 19, price: 9.99, st: "plan_to_read", rating: 0 },
+  { title: "Spy x Family", pub: "Shueisha", sj: true, vol: 12, price: 8.99, ch: 79, st: "on_hold", rating: 7 },
+  { title: "Sakamoto Days", pub: "Shueisha", sj: true, vol: 16, price: 8.99, st: "completed", rating: 9 },
+];
+function row(i) {
+  const c = statusColor[i.st];
+  let sub = `Vol. ${i.vol} · €${i.price.toFixed(2)}`;
+  if (i.ch) sub += ` · Ch. ${i.ch}`;
+  return `<div class="card hstack" style="padding:12px;gap:12px;align-items:center">
+    ${cover({ title: i.title, publisher: i.pub, sj: i.sj, volumesText: `VOL. ${i.vol}`, width: 52, radius: 6 })}
+    <div class="vstack" style="gap:4px;min-width:0;flex:1">
+      <div class="sub w7 nowrap">${i.title}</div>
+      <div class="c1 muted">${sub}</div>
+      <div class="hstack" style="gap:8px">
+        <span style="font-size:10px;line-height:12px;font-weight:900;color:${c};padding:2px 6px;border-radius:4px;background:color-mix(in srgb, ${c} 18%, transparent)">${statusLabel[i.st]}</span>
+        ${stars(i.rating, 11)}
+      </div>
+      ${i.notes ? `<div class="lbl c2 muted nowrap" style="gap:5px">${icon("book", "", "width:11px;height:11px")}<span class="nowrap">${i.notes}</span></div>` : ""}
+    </div>
+    <div class="vstack" style="gap:10px;align-items:center;flex:none">
+      ${icon(i.fav ? "heart.fill" : "heart", "", `width:18px;height:18px;color:${i.fav ? "var(--red)" : "var(--muted)"}`)}
+      ${icon("ellipsis.circle", "", "width:20px;height:20px;color:var(--muted)")}
+    </div>
+  </div>`;
+}
+const pill = (t) => `<span class="chip" style="color:var(--fg);border-radius:8px;padding:7px 10px">${t}${icon("chevron.down", "", "width:9px;height:9px")}</span>`;
+const genres = ["action", "adventure", "comedy", "dark fantasy", "drama", "fantasy", "historical", "horror"];
+const content = `<div class="pad vstack" style="gap:18px">
+  ${header({ lead: "MY", accent: "COLLECTION", subtitle: "Your personal manga vault, volume by volume." })}
+  <div class="grid2">
+    ${statCard("books.vertical", "Volumes", "148")}
+    ${statCard("checkmark.circle", "Completed", "87", "var(--emerald)")}
+    ${statCard("eurosign.circle", "Total Value", "€1342.85")}
+    ${statCard("star", "Avg Rating", "8.4", "var(--orange)")}
+    ${statCard("heart", "Favorites", "24", "var(--red)")}
+  </div>
+  <div class="vstack" style="gap:10px">
+    <div class="chiprow">${chip("All", true)}${["Plan to Read", "Reading", "Completed", "On Hold", "Dropped"].map((s) => chip(s)).join("")}${chip("Favorites", false, "heart", "var(--red)")}</div>
+    <div class="hstack" style="gap:8px">${pill("Any rating")}${pill("Any progress")}</div>
+    <div class="chiprow" style="gap:6px">${genres.map((g) => chip(g)).join("")}</div>
+  </div>
+  <div class="card hstack" style="padding:14px">
+    <span class="lbl sub w7">${icon("books.vertical")}Series progress (23)</span><span class="spacer"></span>${icon("chevron.down", "", "width:14px;height:14px")}
+  </div>
+  <div class="vstack" style="gap:10px">${ITEMS.map(row).join("")}</div>
+</div>`;
+MV.screen({
+  nav: { title: "Collection", trailing: icon("arrow.up.arrow.down", "navicon") + icon("square.grid.2x2", "navicon") },
+  tab: "collection", moreBadge: 2, scroll: 358, content,
+});
+</script></body></html>

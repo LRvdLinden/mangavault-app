@@ -88,6 +88,12 @@
     return `<span class="badge" style="${st}">${o.icon ? icon(o.icon) : ""}${text}</span>`;
   }
   function cover(o) {
+    // Thumbnails (< 100 px) are drawn at a 120 px base and scaled down so the title stays legible.
+    if (o.width && o.width < 100 && !o._inner) {
+      const k = o.width / 120;
+      const inner = cover({ ...o, _inner: true, width: 120, radius: (o.radius ?? 10) / k });
+      return `<div style="width:${o.width}px;height:${o.width * 1.5}px;flex:none;position:relative"><div style="position:absolute;left:0;top:0;transform:scale(${k});transform-origin:0 0">${inner}</div></div>`;
+    }
     const key = o.seed || o.title || "manga";
     const p = PALETTE[hash(key) % PALETTE.length];
     const r = o.radius ?? 10;
