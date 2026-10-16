@@ -181,10 +181,17 @@ struct VolumeDetailView: View {
         }
     }
 
+    private static let locationPlaceholder = "Location information not available yet."
+
+    private static func cleanLocation(_ s: String?) -> String? {
+        guard let v = nonEmpty(s), v != locationPlaceholder else { return nil }
+        return v
+    }
+
     @ViewBuilder private var locationContent: some View {
-        let placeholder = "Location information not available yet."
-        let loc = synopsis?.location.flatMap { $0 == placeholder ? nil : nonEmpty($0) }
-        let set = synopsis?.setting.flatMap { $0 == placeholder ? nil : nonEmpty($0) }
+        let placeholder = Self.locationPlaceholder
+        let loc: String? = Self.cleanLocation(synopsis?.location)
+        let set: String? = Self.cleanLocation(synopsis?.setting)
         if loc == nil && set == nil {
             Text(placeholder).font(.subheadline).italic().foregroundStyle(Theme.muted)
         } else {
@@ -214,7 +221,13 @@ struct VolumeDetailView: View {
         if let l = m.languages, !l.isEmpty { rows.append(("Language", l.joined(separator: ", "))) }
         rows.append(("Total Volumes", "\(maxVolume)"))
         if !chapters.isEmpty {
-            rows.append(("Chapters Included", chapters.count > 3 ? "\(chapters.first!)–\(chapters.last!) (\(chapters.count))" : chapters.joined(separator: ", ")))
+            let chapterText: String
+            if chapters.count > 3, let first = chapters.first, let last = chapters.last {
+                chapterText = "\(first)–\(last) (\(chapters.count))"
+            } else {
+                chapterText = chapters.joined(separator: ", ")
+            }
+            rows.append(("Chapters Included", chapterText))
         }
         rows.append(("Price", m.priceValue.euro))
         if let item, item.chapter > 0 { rows.append(("Reading Progress", "Chapter \(item.chapter)")) }
@@ -452,7 +465,7 @@ struct SkeletonLines: View {
         VStack(alignment: .leading, spacing: 8) {
             ForEach([1.0, 0.85, 0.65], id: \.self) { w in
                 GeometryReader { g in
-                    RoundedRectangle(cornerRadius: 4).fill(Theme.secondary).frame(width: g.size.width * w, height: 12)
+                    RoundedRectangle(cornerRadius: 4).fill(Theme.secondary).frame(width: g.size.width * CGFloat(w), height: 12)
                 }
                 .frame(height: 12)
             }
