@@ -2,11 +2,6 @@
 
 Native SwiftUI app for **Manga Vault** (https://mangas.base44.app). It talks to the same Base44 backend as the web app, so your account, collection, wishlist, XP, cards, events and friends are shared between web and iPhone/iPad.
 
-- Bundle ID: `nl.lrvdlinden.mangavault`
-- Version 1.0.0 (build 2)
-- iOS / iPadOS 17.0+, Xcode 16+
-- Team: EU3UY476T6 (automatic signing)
-
 ## Open & run
 
 1. Open `ios/MangaVault.xcodeproj` in Xcode.
