@@ -448,7 +448,7 @@ private fun AuthForgotView(go: (AuthStep) -> Unit) {
                             Base44.resetPasswordRequest(email.trim())
                         } catch (e: CancellationException) {
                             throw e
-                        } catch (_: Exception) {
+                        } catch (ignored: Exception) {
                             // Same as iOS (try?): always show the neutral confirmation.
                         }
                         loading = false

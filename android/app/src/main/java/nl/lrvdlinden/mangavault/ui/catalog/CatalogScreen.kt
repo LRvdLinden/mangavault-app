@@ -227,7 +227,7 @@ fun CatalogScreen(discover: Boolean) {
             owned = Base44.distinct("CollectionItem", "manga_id").toSet()
         } catch (e: CancellationException) {
             throw e
-        } catch (_: Exception) {
+        } catch (ignored: Exception) {
         }
     }
 
