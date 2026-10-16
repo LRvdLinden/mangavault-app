@@ -1070,6 +1070,12 @@ struct MangaRoomView: View {
     private var isOwn: Bool { userId == nil || userId == myId }
     private var targetId: String? { userId ?? myId }
 
+    private var headerSubtitle: String {
+        if isOwn { return "Arrange your collection, cards, and decorations." }
+        let name: String = nonEmpty(ownerName) ?? "Reader"
+        return "\(name)'s Manga Room"
+    }
+
     private var shareURL: URL? {
         guard let myId else { return nil }
         return Config.appBaseURL.appendingPathComponent("u/\(myId)/room")
@@ -1078,9 +1084,7 @@ struct MangaRoomView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                ScreenHeader(lead: "MANGA", accent: "ROOM",
-                             subtitle: isOwn ? "Arrange your collection, cards, and decorations."
-                                             : "\(nonEmpty(ownerName) ?? "Reader")'s Manga Room")
+                ScreenHeader(lead: "MANGA", accent: "ROOM", subtitle: headerSubtitle)
                 if loading {
                     LoadingView()
                 } else {
@@ -1168,8 +1172,10 @@ struct MangaRoomView: View {
     }
 
     private func roomObject(index: Int, item: RoomItem, size: CGSize) -> some View {
-        let px: CGFloat = size.width * CGFloat(svClamp(item.x, 2, 96)) / 100
-        let py: CGFloat = size.height * CGFloat(svClamp(item.y, 2, 95)) / 100
+        let fx: CGFloat = CGFloat(svClamp(item.x, 2, 96)) / 100
+        let fy: CGFloat = CGFloat(svClamp(item.y, 2, 95)) / 100
+        let px: CGFloat = size.width * fx
+        let py: CGFloat = size.height * fy
         let mask: GestureMask = isOwn ? .all : .subviews
         return SVRoomObject(item: item, editable: isOwn) {
             removeItem(at: index)
@@ -1190,8 +1196,10 @@ struct MangaRoomView: View {
             dragOrigin = SVDragOrigin(index: index, x: items[index].x, y: items[index].y)
         }
         guard let o = dragOrigin else { return }
-        let nx = o.x + Double(translation.width / size.width) * 100
-        let ny = o.y + Double(translation.height / size.height) * 100
+        let dxRatio: Double = Double(translation.width / size.width)
+        let dyRatio: Double = Double(translation.height / size.height)
+        let nx: Double = o.x + dxRatio * 100
+        let ny: Double = o.y + dyRatio * 100
         items[index].x = svClamp(nx, 2, 96)
         items[index].y = svClamp(ny, 2, 95)
     }

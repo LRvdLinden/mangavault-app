@@ -514,8 +514,14 @@ struct CapsulesView: View {
     }
 
     private var opened: [VaultCapsule] {
-        (data?.capsules ?? []).filter { $0.opened ?? false }
-            .sorted { (nonEmpty($0.opened_date) ?? $0.created_date ?? "") > (nonEmpty($1.opened_date) ?? $1.created_date ?? "") }
+        let all: [VaultCapsule] = data?.capsules ?? []
+        let openedOnly: [VaultCapsule] = all.filter { $0.opened ?? false }
+        return openedOnly.sorted { Self.openedSortKey($0) > Self.openedSortKey($1) }
+    }
+
+    private static func openedSortKey(_ c: VaultCapsule) -> String {
+        if let d = nonEmpty(c.opened_date) { return d }
+        return c.created_date ?? ""
     }
 
     var body: some View {
@@ -814,7 +820,8 @@ struct CardsView: View {
     private var stats: some View {
         let total = cards.count
         let ownedCount = cards.filter { owned[$0.card_id] != nil }.count
-        let pct = total > 0 ? Int((Double(ownedCount) / Double(total) * 100).rounded()) : 0
+        let ratio: Double = total > 0 ? Double(ownedCount) / Double(total) : 0
+        let pct: Int = Int((ratio * 100).rounded())
         return HStack(spacing: 10) {
             StatCard(icon: "rectangle.stack", label: "Collected", value: "\(ownedCount)/\(total)")
             StatCard(icon: "chart.pie", label: "Complete", value: "\(pct)%", accent: Theme.emerald)
@@ -880,7 +887,8 @@ struct CardsView: View {
 
     private func cardCell(_ c: TradingCard) -> some View {
         let o = owned[c.card_id]
-        let favAction: (() -> Void)? = o != nil ? { toggleFavorite(c) } : nil
+        var favAction: (() -> Void)? = nil
+        if o != nil { favAction = { toggleFavorite(c) } }
         return TradingCardView(card: c, owned: o != nil, count: o?.count ?? 0, favorite: o?.favorite ?? false,
                                size: .md, onTap: { detail = c }, onFavorite: favAction)
             .frame(maxWidth: .infinity)
@@ -983,7 +991,11 @@ struct EventsView: View {
                 active.append(e)
             }
         }
-        upcoming.sort { (RVDay.parse($0.start_date) ?? Date.distantFuture) < (RVDay.parse($1.start_date) ?? Date.distantFuture) }
+        upcoming.sort { a, b in
+            let da: Date = RVDay.parse(a.start_date) ?? Date.distantFuture
+            let db: Date = RVDay.parse(b.start_date) ?? Date.distantFuture
+            return da < db
+        }
         return (active, upcoming, completed)
     }
 
@@ -1806,7 +1818,9 @@ struct EventDetailView: View {
             grand = g
             errorText = nil
             var ids: [String] = []
-            for id in (g.event?.extra_card_ids ?? []) + [g.event?.reward_card_id].compactMap({ nonEmpty($0) }) {
+            var candidates: [String] = g.event?.extra_card_ids ?? []
+            if let rewardId = nonEmpty(g.event?.reward_card_id) { candidates.append(rewardId) }
+            for id in candidates {
                 if !id.isEmpty && !ids.contains(id) { ids.append(id) }
             }
             if !ids.isEmpty {

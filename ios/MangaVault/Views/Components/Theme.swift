@@ -33,7 +33,10 @@ extension Color {
         if s.count == 3 { s = s.map { "\($0)\($0)" }.joined() }
         var v: UInt64 = 0
         Scanner(string: s).scanHexInt64(&v)
-        self.init(red: Double((v >> 16) & 0xFF) / 255, green: Double((v >> 8) & 0xFF) / 255, blue: Double(v & 0xFF) / 255)
+        let r: Double = Double((v >> 16) & 0xFF) / 255
+        let g: Double = Double((v >> 8) & 0xFF) / 255
+        let b: Double = Double(v & 0xFF) / 255
+        self.init(red: r, green: g, blue: b)
     }
 }
 
@@ -254,7 +257,7 @@ struct ProgressBar: View {
             ZStack(alignment: .leading) {
                 Capsule().fill(Theme.secondary)
                 Capsule().fill(color)
-                    .frame(width: geo.size.width * max(0, min(1, value)))
+                    .frame(width: geo.size.width * CGFloat(max(0, min(1, value))))
                     .shadow(color: color.opacity(0.5), radius: 6)
             }
         }

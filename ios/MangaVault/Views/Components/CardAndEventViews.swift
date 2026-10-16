@@ -119,8 +119,47 @@ struct CountdownView: View {
 /// Falling snow + string lights (web: SnowLayer).
 struct SnowLayer: View {
     var lights = true
-    private static let flakes: [(x: Double, size: CGFloat, dur: Double, delay: Double)] =
-        (0..<18).map { t in (Double(t * 37 % 100) / 100, CGFloat(8 + t * 7 % 10), Double(6 + t * 3 % 7), Double(t) * 0.7.truncatingRemainder(dividingBy: 6)) }
+    private typealias Flake = (x: Double, size: CGFloat, dur: Double, delay: Double)
+    private static let flakes: [Flake] = makeFlakes()
+
+    private static let bulbColors: [Color] = [Theme.primary, Color.white, Theme.red, Theme.emerald]
+
+    private func lightBulb(index i: Int, time t: Double) -> some View {
+        let c: Color = Self.bulbColors[i % 4]
+        let phase: Double = t * 3.0 + Double(i % 4)
+        let alpha: Double = 0.5 + 0.5 * sin(phase)
+        return Circle().fill(c).frame(width: 6, height: 6).shadow(color: c, radius: 4)
+            .opacity(alpha)
+            .frame(maxWidth: .infinity)
+    }
+
+    private func flakePosition(_ f: Flake, time t: Double, size: CGSize) -> CGPoint {
+        let raw: Double = (t + f.delay) / f.dur
+        let progress: CGFloat = CGFloat(raw.truncatingRemainder(dividingBy: 1))
+        let x: CGFloat = size.width * CGFloat(f.x)
+        let travel: CGFloat = size.height + 20
+        let y: CGFloat = travel * progress - 10
+        return CGPoint(x: x, y: y)
+    }
+
+    private func flake(index i: Int, time t: Double, size: CGSize) -> some View {
+        let f: Flake = Self.flakes[i]
+        let pos: CGPoint = flakePosition(f, time: t, size: size)
+        return Text("❄").font(.system(size: f.size)).foregroundStyle(.white.opacity(0.8))
+            .position(x: pos.x, y: pos.y)
+    }
+
+    private static func makeFlakes() -> [Flake] {
+        var out: [Flake] = []
+        for t in 0..<18 {
+            let x: Double = Double((t * 37) % 100) / 100.0
+            let size: CGFloat = CGFloat(8 + (t * 7) % 10)
+            let dur: Double = Double(6 + (t * 3) % 7)
+            let delay: Double = (Double(t) * 0.7).truncatingRemainder(dividingBy: 6.0)
+            out.append((x: x, size: size, dur: dur, delay: delay))
+        }
+        return out
+    }
 
     var body: some View {
         GeometryReader { geo in
@@ -128,18 +167,12 @@ struct SnowLayer: View {
                 let t = ctx.date.timeIntervalSinceReferenceDate
                 ZStack(alignment: .topLeading) {
                     ForEach(0..<Self.flakes.count, id: \.self) { i in
-                        let f = Self.flakes[i]
-                        let p = ((t + f.delay) / f.dur).truncatingRemainder(dividingBy: 1)
-                        Text("❄").font(.system(size: f.size)).foregroundStyle(.white.opacity(0.8))
-                            .position(x: geo.size.width * f.x, y: -10 + (geo.size.height + 20) * p)
+                        flake(index: i, time: t, size: geo.size)
                     }
                     if lights {
                         HStack(spacing: 0) {
                             ForEach(0..<14, id: \.self) { i in
-                                let c = [Theme.primary, Color.white, Theme.red, Theme.emerald][i % 4]
-                                Circle().fill(c).frame(width: 6, height: 6).shadow(color: c, radius: 4)
-                                    .opacity(0.5 + 0.5 * sin(t * 3 + Double(i % 4)))
-                                    .frame(maxWidth: .infinity)
+                                lightBulb(index: i, time: t)
                             }
                         }
                         .padding(.top, 4)

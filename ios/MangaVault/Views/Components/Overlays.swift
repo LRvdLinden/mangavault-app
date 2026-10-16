@@ -44,17 +44,24 @@ struct ConfettiView: View {
     var body: some View {
         TimelineView(.animation(paused: particles.isEmpty)) { timeline in
             Canvas { ctx, size in
-                let t = CGFloat(timeline.date.timeIntervalSince(start))
+                let t: CGFloat = CGFloat(timeline.date.timeIntervalSince(start))
+                let fade: CGFloat = 1 - t / 2.6
+                let alpha: Double = Double(max(0, fade))
+                let gravity: CGFloat = 450 * t * t
                 for p in particles {
-                    let px = size.width * p.x + p.vx * t
-                    let py = size.height * 0.4 + p.vy * t + 450 * t * t
-                    let alpha = Double(max(0, 1 - t / 2.6))
+                    let px: CGFloat = size.width * p.x + p.vx * t
+                    let baseY: CGFloat = size.height * 0.4
+                    let py: CGFloat = baseY + p.vy * t + gravity
+                    let degrees: Double = p.spin * Double(t) * 360
                     var c = ctx
                     c.opacity = alpha
                     c.translateBy(x: px, y: py)
-                    c.rotate(by: .degrees(p.spin * Double(t) * 360))
-                    let rect = CGRect(x: -p.size / 2, y: -p.size / 2, width: p.size, height: p.size * (p.circle ? 1 : 0.6))
-                    c.fill(p.circle ? Path(ellipseIn: rect) : Path(rect), with: .color(p.color))
+                    c.rotate(by: .degrees(degrees))
+                    let half: CGFloat = p.size / 2
+                    let heightFactor: CGFloat = p.circle ? 1 : 0.6
+                    let rect = CGRect(x: -half, y: -half, width: p.size, height: p.size * heightFactor)
+                    let shape: Path = p.circle ? Path(ellipseIn: rect) : Path(rect)
+                    c.fill(shape, with: .color(p.color))
                 }
             }
         }
@@ -66,8 +73,9 @@ struct ConfettiView: View {
     private func burst() {
         start = Date()
         particles = (0..<90).map { _ in
-            let angle = Double.random(in: (-90 - 35)...(-90 + 35)) * .pi / 180
-            let speed = CGFloat.random(in: 350...850)
+            let degrees: Double = Double.random(in: -125.0 ... -55.0)
+            let angle: Double = degrees * Double.pi / 180
+            let speed: CGFloat = CGFloat.random(in: 350...850)
             return Particle(color: Self.colors.randomElement()!,
                             x: 0.5,
                             vx: CGFloat(cos(angle)) * speed,
