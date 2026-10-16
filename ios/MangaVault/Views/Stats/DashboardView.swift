@@ -35,7 +35,12 @@ enum ChartData {
         var perMonth: [String: Int] = [:]
         for i in items { let m = String((i.created_date ?? "").prefix(7)); if !m.isEmpty { perMonth[m, default: 0] += 1 } }
         var total = 0
-        return perMonth.keys.sorted().map { k in total += perMonth[k]!; return ChartDatum(name: k, value: total) }
+        var out: [ChartDatum] = []
+        for k in perMonth.keys.sorted() {
+            total += perMonth[k] ?? 0
+            out.append(ChartDatum(name: k, value: total))
+        }
+        return out
     }
 
     static func ratings(_ items: [CollectionItem]) -> [ChartDatum] {
@@ -171,16 +176,19 @@ struct DashboardView: View {
 
     private var statGrid: some View {
         let count: (ReadStatus) -> Int = { s in items.filter { $0.effectiveStatus == s }.count }
-        let rated = items.filter { ($0.rating ?? 0) > 0 }
-        let avg = rated.isEmpty ? "—" : String(format: "%.1f", rated.reduce(0.0) { $0 + ($1.rating ?? 0) } / Double(rated.count))
+        let rated: [CollectionItem] = items.filter { ($0.rating ?? 0) > 0 }
+        let ratingSum: Double = rated.reduce(0.0) { (sum: Double, i: CollectionItem) -> Double in sum + (i.rating ?? 0) }
+        let avg: String = rated.isEmpty ? "—" : String(format: "%.1f", ratingSum / Double(rated.count))
+        let totalValue: Double = items.reduce(0.0) { (sum: Double, i: CollectionItem) -> Double in sum + (i.price ?? 0) }
+        let favoriteCount: Int = items.filter { $0.isFavorite }.count
         return LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
             StatCard(icon: "books.vertical", label: "Volumes", value: "\(items.count)")
             StatCard(icon: "book", label: "Reading", value: "\(count(.reading))")
             StatCard(icon: "checkmark.circle", label: "Completed", value: "\(count(.completed))", accent: Theme.emerald)
             StatCard(icon: "bookmark", label: "Plan to Read", value: "\(count(.plan_to_read))", accent: Theme.sky)
             StatCard(icon: "pause.circle", label: "On Hold", value: "\(count(.on_hold))", accent: Theme.orange)
-            StatCard(icon: "heart", label: "Favorites", value: "\(items.filter { $0.isFavorite }.count)", accent: Theme.red)
-            StatCard(icon: "eurosign.circle", label: "Total Value", value: items.reduce(0.0) { $0 + ($1.price ?? 0) }.euro)
+            StatCard(icon: "heart", label: "Favorites", value: "\(favoriteCount)", accent: Theme.red)
+            StatCard(icon: "eurosign.circle", label: "Total Value", value: totalValue.euro)
             StatCard(icon: "star", label: "Avg Rating", value: avg, accent: Theme.orange)
         }
     }
@@ -188,10 +196,15 @@ struct DashboardView: View {
     /// Trading cards · achievements · sealed capsules (web: quick links row).
     private var vaultLinks: some View {
         HStack(spacing: 10) {
-            vaultLink(.cards, "rectangle.stack.fill", "Trading Cards", cardCount.map(String.init) ?? "…")
-            vaultLink(.achievements, "trophy.fill", "Achievements", "\(unlockedAchievements.count)")
-            vaultLink(.capsules, "shippingbox.fill", "Sealed Capsules", capsuleCount.map(String.init) ?? "…")
+            vaultLink(.cards, "rectangle.stack.fill", "Trading Cards", countText(cardCount))
+            vaultLink(.achievements, "trophy.fill", "Achievements", String(unlockedAchievements.count))
+            vaultLink(.capsules, "shippingbox.fill", "Sealed Capsules", countText(capsuleCount))
         }
+    }
+
+    private func countText(_ n: Int?) -> String {
+        guard let n else { return "…" }
+        return String(n)
     }
 
     private func vaultLink(_ route: Route, _ icon: String, _ label: String, _ value: String) -> some View {
@@ -260,7 +273,7 @@ struct DashboardView: View {
             .buttonStyle(.plain)
             VStack(alignment: .leading, spacing: 4) {
                 Text(i.titleText).font(.subheadline.weight(.bold)).lineLimit(1)
-                Text("Vol. \(i.volume.map(String.init) ?? "—") · Reading").font(.caption.weight(.bold)).foregroundStyle(Theme.primary)
+                Text(readingVolumeLine(i)).font(.caption.weight(.bold)).foregroundStyle(Theme.primary)
                 Text(chapterLine(i))
                     .font(.caption2).foregroundStyle(Theme.muted)
                 HStack(spacing: 8) {
@@ -290,6 +303,11 @@ struct DashboardView: View {
         .cardStyle()
     }
 
+    private func readingVolumeLine(_ i: CollectionItem) -> String {
+        let vol: String = i.volume.map { String($0) } ?? "—"
+        return "Vol. \(vol) · Reading"
+    }
+
     private func chapterLine(_ i: CollectionItem) -> String {
         let chapter: String = i.chapter > 0 ? "Chapter \(i.chapter)" : "No chapter logged yet"
         guard let d = nonEmpty(i.last_read_date) else { return chapter }
@@ -302,7 +320,7 @@ struct DashboardView: View {
 
     private var questsSummary: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("DAILY QUESTS", "target", link: ("Claim rewards", .quests))
+            sectionTitle("DAILY QUESTS", "target", link: ("Claim rewards", Route.quests))
             VStack(spacing: 8) {
                 ForEach(dailyQuests) { q in
                     VStack(alignment: .leading, spacing: 6) {
@@ -339,7 +357,7 @@ struct DashboardView: View {
             }
         }
         return VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("RECENT ACHIEVEMENTS", "trophy.fill", link: ("View all", .achievements))
+            sectionTitle("RECENT ACHIEVEMENTS", "trophy.fill", link: ("View all", Route.achievements))
             if rows.isEmpty {
                 Text("No achievements unlocked yet. Visit Achievements to check your progress.")
                     .font(.subheadline).foregroundStyle(Theme.muted).padding(16).frame(maxWidth: .infinity, alignment: .leading).cardStyle()
@@ -363,7 +381,7 @@ struct DashboardView: View {
 
     private var recentCardsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
-            sectionTitle("RECENT TRADING CARDS", "rectangle.stack.fill", link: ("View all", .cards))
+            sectionTitle("RECENT TRADING CARDS", "rectangle.stack.fill", link: ("View all", Route.cards))
             if let cards = recentCards {
                 if cards.isEmpty {
                     Text("No cards yet. Claim your starter pack on the Trading Cards page.")
@@ -498,7 +516,10 @@ struct DashboardView: View {
                 }
                 if !(st.fresh ?? []).isEmpty { app.celebrate() }
             } else {
-                level = XP.level(for: XP.base(items: its, genres: VaultService.genreCount(its, gm)) + (profile?.xpBonus ?? 0))
+                let genreCount: Int = VaultService.genreCount(its, gm)
+                let baseXP: Int = XP.base(items: its, genres: genreCount)
+                let bonusXP: Int = profile?.xpBonus ?? 0
+                level = XP.level(for: baseXP + bonusXP)
             }
             await loadVaultCounts()
         } catch {
@@ -542,7 +563,9 @@ struct DashboardView: View {
         layout = new
         guard let p = profile else { return }
         do {
-            try await Base44Client.shared.update("UserProfile", p.id, ["dashboard_layout": new.map { s -> [String: Any] in ["id": s.id, "hidden": s.hidden] }])
+            let sections: [[String: Any]] = new.map { s -> [String: Any] in ["id": s.id, "hidden": s.hidden] }
+            let body: [String: Any] = ["dashboard_layout": sections]
+            try await Base44Client.shared.update("UserProfile", p.id, body)
             await ProfileStore.shared.invalidate()
         } catch { app.fail("Could not save layout", error) }
     }
