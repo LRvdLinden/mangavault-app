@@ -12,7 +12,7 @@ const EVENT = {
 };
 const pill = (label, hex) => `<span style="font-size:10px;font-weight:900;padding:3px 8px;border-radius:4px;color:${hex};background:${hex}26;box-shadow:inset 0 0 0 1px ${hex}80">${label}</span>`;
 function eventCard(e) {
-  return `<div style="border-radius:14px;overflow:hidden;background:var(--card);box-shadow:inset 0 0 0 1px ${e.active ? e.accent + "80" : "var(--border)"}">
+  return `<div style="border-radius:14px;overflow:hidden;background:var(--card);border:1px solid ${e.active ? e.accent + "80" : "var(--border)"}">
     <div style="position:relative;height:130px;background:linear-gradient(to bottom right, ${e.accent}, var(--bg))">
       <div style="position:absolute;inset:0;background:linear-gradient(to bottom, transparent, rgba(0,0,0,.6))"></div>
       <div class="hstack" style="position:absolute;left:10px;right:10px;top:10px">${badge(e.type.toUpperCase(), { bg: "rgba(0,0,0,.65)", ring: e.accent + "99" })}<span class="spacer"></span>${e.active ? badge("LIVE", { icon: "dot.radiowaves.left.and.right", bg: "var(--red)" }) : ""}</div>

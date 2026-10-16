@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<title>Profile – ProfileView</title>
+<link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body><script>
+// ProfileView(profileId:) (Views/Profile/ProfileView.swift): a friend's public profile, opened from Friends.
+// No banner/avatar uploaded → the view's default gradient banner and person placeholder.
+const { icon, badge } = MV;
+const stat = (l, v) => `<div class="vstack" style="gap:1px"><span class="c2 w7 muted up">${l}</span><span class="t3 w9">${v}</span></div>`;
+const tag = (t) => `<span class="c1 w7" style="padding:5px 10px;border-radius:8px;background:var(--card-solid);box-shadow:inset 0 0 0 1px var(--border);white-space:nowrap">${t}</span>`;
+const tags = (title, list) => `<div class="c1 w7 muted up" style="padding-top:4px">${title}</div><div style="display:flex;flex-wrap:wrap;gap:8px">${list.map(tag).join("")}</div>`;
+const content = `<div class="pad vstack" style="gap:20px">
+  <div style="border-radius:18px;overflow:hidden;border:1px solid var(--border);position:relative">
+    <div style="height:150px;background:linear-gradient(to bottom right, rgba(255,122,0,.35), #101010)"></div>
+    <div class="vstack" style="padding:18px;gap:10px">
+      <div class="hstack" style="align-items:flex-end;margin-top:-46px">
+        <div style="width:92px;height:92px;border-radius:18px;background:var(--card-solid);box-shadow:0 0 0 4px var(--bg);display:flex;align-items:center;justify-content:center;color:var(--muted)">${icon("person.fill", "", "width:34px;height:34px")}</div>
+        <span class="spacer"></span>${badge("PUBLIC", { icon: "globe", fg: "var(--emerald)", bg: "rgba(16,185,129,.2)", ring: "rgba(16,185,129,.4)" })}
+      </div>
+      <div class="t2 w9">mangafan_ruby</div>
+      <div class="sub muted">Seinen &amp; dark fantasy collector. Rereading Vinland Saga.</div>
+      <div class="vstack" style="gap:12px;padding-top:6px">
+        <div class="hstack" style="gap:22px">${stat("Friends", "14")}${stat("Series", "31")}${stat("Volumes", "212")}</div>
+        <div class="hstack" style="gap:10px">
+          <div class="btn primary flex">${icon("books.vertical")}View Collection</div>
+          <div class="btn outline flex">${icon("bubble.left.and.bubble.right")}Message</div>
+        </div>
+        <div class="lbl c1 w7 em">${icon("checkmark.circle.fill", "", "width:13px;height:13px")}Friends</div>
+      </div>
+      <div class="c1 w7 muted" style="padding-top:4px">FEATURED ACHIEVEMENTS</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px">${["👑 Manga Master", "🔥 Unbreakable", "🏆 Completionist"].map(tag).join("")}</div>
+      ${tags("Favorite Manga", ["Vinland Saga", "Frieren", "Chainsaw Man", "Dandadan"])}
+      ${tags("Favorite Characters", ["Thorfinn", "Frieren", "Power", "Okarun"])}
+      ${tags("Favorite Genres", ["Seinen", "Dark Fantasy", "Historical", "Horror"])}
+    </div>
+  </div>
+</div>`;
+MV.screen({ nav: { back: "Friends", title: "Reader" }, tab: "more", moreBadge: 2, scroll: 40, content });
+</script></body></html>

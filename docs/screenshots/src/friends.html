@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<title>Friends – FriendsView</title>
+<link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body><script>
+// FriendsView (Views/Social/SocialViews.swift), More › Friends, "Friends" segment selected.
+// SVAvatar without image = first letter on an orange-tinted circle.
+const { icon, header } = MV;
+const FRIENDS = [
+  ["mangafan_ruby", "Seinen & dark fantasy collector. Rereading Vinland Saga."],
+  ["shonen_sam", "One Piece since volume 1. Waiting for the final saga."],
+  ["panelhopper", "Weekly Jump reader, Kagurabachi hype train."],
+  ["otaku_owl", "Night reader. Frieren and slice-of-life forever."],
+  ["inkblot_ninja", "Collecting every Chainsaw Man variant cover."],
+  ["kawaii_kenta", "Spy x Family & Sakamoto Days on repeat."],
+  ["volume_vault", "212 volumes and counting."],
+];
+const seg = (t, on) => `<div style="flex:1 1 0;min-width:0;white-space:nowrap;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:${on ? 600 : 500};${on ? "background:#636366;box-shadow:0 3px 8px rgba(0,0,0,.12)" : ""}">${t}</div>`;
+const row = ([name, bio]) => `<div class="card hstack" style="padding:12px;gap:12px">
+  <div style="width:46px;height:46px;border-radius:50%;flex:none;background:rgba(255,122,0,.2);box-shadow:inset 0 0 0 1px var(--border);display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900;color:var(--primary)">${name[0].toUpperCase()}</div>
+  <div class="vstack" style="gap:3px;min-width:0;flex:1"><span class="sub w7 nowrap">${name}</span><span class="c1 muted clamp2">${bio}</span></div>
+  <div class="hstack" style="gap:6px;flex:none">
+    <span style="width:34px;height:34px;border-radius:8px;background:var(--primary);display:flex;align-items:center;justify-content:center;color:#fff">${icon("bubble.left.fill", "", "width:15px;height:15px")}</span>
+    <span style="width:34px;height:34px;border-radius:8px;background:var(--card-solid);box-shadow:inset 0 0 0 1px var(--border);display:flex;align-items:center;justify-content:center;color:var(--red)">${icon("person.badge.minus", "", "width:16px;height:16px")}</span>
+  </div>
+</div>`;
+const content = `<div class="pad vstack" style="gap:18px">
+  ${header({ lead: "MY", accent: "FRIENDS", subtitle: "Find readers, manage requests and chat." })}
+  <div class="hstack" style="padding:2px;border-radius:9px;background:rgba(118,118,128,.24);gap:2px">${seg("Friends (7)", true)}${seg("Requests (1)")}${seg("Sent (0)")}${seg("Find")}</div>
+  <div class="vstack" style="gap:10px">${FRIENDS.map(row).join("")}</div>
+</div>`;
+MV.screen({ nav: { back: "More", title: "Friends" }, tab: "more", moreBadge: 2, scroll: 0, content });
+</script></body></html>
