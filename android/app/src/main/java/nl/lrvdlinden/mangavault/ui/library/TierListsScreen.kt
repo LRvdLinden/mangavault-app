@@ -139,7 +139,7 @@ fun TierListsScreen() {
     suspend fun load() {
         loading = true
         try {
-            lists = Base44.list<TierList>("TierList", sort = "-created_date", limit = 200).items
+            lists = Base44.list<TierList>("TierList", sort = "-created_date", limit = 200).items.distinctBy { it.id }
         } catch (e: Exception) {
             app.fail("Could not load tier lists", e)
         }

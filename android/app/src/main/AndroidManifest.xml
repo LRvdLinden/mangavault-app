@@ -16,6 +16,7 @@
             android:exported="true"
             android:launchMode="singleTask"
             android:windowSoftInputMode="adjustResize"
+            android:configChanges="orientation|screenSize|screenLayout|smallestScreenSize|keyboardHidden|uiMode|density"
             android:theme="@style/Theme.MangaVault">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

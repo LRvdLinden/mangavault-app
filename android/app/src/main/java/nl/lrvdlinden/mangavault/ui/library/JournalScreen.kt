@@ -116,7 +116,7 @@ fun JournalScreen() {
     suspend fun load() {
         loading = true
         try {
-            entries = Base44.list<JournalEntry>("JournalEntry", sort = "-created_date", limit = 1000).items
+            entries = Base44.list<JournalEntry>("JournalEntry", sort = "-created_date", limit = 1000).items.distinctBy { it.id }
         } catch (e: Exception) {
             app.fail("Could not load journal", e)
         }

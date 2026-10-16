@@ -184,7 +184,7 @@ fun CatalogScreen(discover: Boolean) {
             val head = result.first
             val rest = result.second
             val headIds = head.map { it.id }.toSet()
-            mangas = head + rest.items.filter { it.id !in headIds }
+            mangas = (head + rest.items.filter { it.id !in headIds }).distinctBy { it.id }
             cursor = rest.next_cursor
             hasMore = rest.has_more ?: false
         } catch (e: CancellationException) {
@@ -204,7 +204,7 @@ fun CatalogScreen(discover: Boolean) {
             val page = Base44.list<Manga>("Manga", query = currentQuery, sort = "title", limit = CATALOG_PAGE_SIZE,
                 fields = Manga.listFields, cursor = c)
             val known = mangas.map { it.id }.toSet()
-            mangas = mangas + page.items.filter { it.id !in known }
+            mangas = mangas + page.items.filter { it.id !in known }.distinctBy { it.id }
             cursor = page.next_cursor
             hasMore = page.has_more ?: false
         } catch (e: Exception) {

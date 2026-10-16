@@ -238,7 +238,7 @@ fun LoadingView(modifier: Modifier = Modifier) {
 @Composable
 fun ProgressBar(value: Float, modifier: Modifier = Modifier, height: Dp = 8.dp, color: Color = Vault.primary) {
     Box(modifier.fillMaxWidth().height(height).clip(CircleShape).background(Vault.secondary)) {
-        Box(Modifier.fillMaxWidth(value.coerceIn(0f, 1f)).fillMaxHeight().clip(CircleShape).background(color))
+        Box(Modifier.fillMaxWidth(if (value.isNaN()) 0f else value.coerceIn(0f, 1f)).fillMaxHeight().clip(CircleShape).background(color))
     }
 }
 

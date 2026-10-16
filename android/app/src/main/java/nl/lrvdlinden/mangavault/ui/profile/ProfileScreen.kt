@@ -97,7 +97,13 @@ private fun profileSplit(s: String): List<String> = s.split(",").map { it.trim()
 /** Reads, downscales and JPEG-encodes a picked image (off the main thread). */
 private suspend fun profileReadJpeg(context: Context, uri: Uri, maxSide: Int): ByteArray? = withContext(Dispatchers.IO) {
     val raw = context.contentResolver.openInputStream(uri)?.use { it.readBytes() } ?: return@withContext null
-    val img = BitmapFactory.decodeByteArray(raw, 0, raw.size) ?: return@withContext null
+    // Subsample large photos while decoding so a 50 MP image can't OOM before the downscale below.
+    val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+    BitmapFactory.decodeByteArray(raw, 0, raw.size, bounds)
+    var sample = 1
+    while (max(bounds.outWidth, bounds.outHeight) / (sample * 2) >= maxSide) sample *= 2
+    val opts = BitmapFactory.Options().apply { inSampleSize = sample }
+    val img = BitmapFactory.decodeByteArray(raw, 0, raw.size, opts) ?: return@withContext null
     val scale = min(1f, maxSide.toFloat() / max(img.width, img.height).toFloat())
     val resized = if (scale < 1f) {
         Bitmap.createScaledBitmap(img, max(1, (img.width * scale).roundToInt()), max(1, (img.height * scale).roundToInt()), true)

@@ -26,7 +26,8 @@ class MainActivity : ComponentActivity() {
         Base44.init(applicationContext)
         app = AppState(lifecycleScope)
         app.bootstrap()
-        intent?.data?.let { app.handle(it) }
+        // Only on a fresh launch: after a configuration change the same intent would replay an old auth token.
+        if (savedInstanceState == null) intent?.data?.let { app.handle(it) }
         setContent {
             MangaVaultTheme {
                 CompositionLocalProvider(LocalApp provides app) { RootScreen() }

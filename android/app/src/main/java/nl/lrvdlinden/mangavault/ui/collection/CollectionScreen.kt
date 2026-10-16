@@ -194,7 +194,7 @@ private class ColModel {
                 all += page.items
                 cursor = if (page.has_more == true) page.next_cursor else null
             } while (cursor != null)
-            items = all
+            items = all.distinctBy { it.id }
             lastLoadedVersion = app.dataVersion
             val ids = all.mapNotNull { nonEmpty(it.manga_id) }.distinct()
             val info = mutableMapOf<String, ColMangaInfo>()
