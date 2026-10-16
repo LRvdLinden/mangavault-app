@@ -64,8 +64,7 @@ struct MangaDetailView: View {
                 }
                 Text(m.title).font(.system(size: 30, weight: .black)).tracking(-1).foregroundStyle(Theme.foreground)
                 if m.isOmnibus, let of = nonEmpty(m.omnibus_of) {
-                    (Text("Omnibus edition of ").foregroundStyle(Theme.muted) + Text(of).foregroundStyle(Theme.primary).bold()
-                     + Text(" · \(m.volumes_included ?? "")").foregroundStyle(Theme.muted)).font(.subheadline)
+                    omnibusLine(of: of, included: m.volumes_included ?? "").font(.subheadline)
                 }
                 if let g = nonEmpty(m.genre) { Text(g).font(.subheadline).foregroundStyle(Theme.muted) }
                 if let d = nonEmpty(m.description) {
@@ -76,8 +75,7 @@ struct MangaDetailView: View {
             }
 
             HStack(spacing: 28) {
-                stat(m.isOmnibus ? "Volumes Included" : "Volumes",
-                     m.isOmnibus ? (nonEmpty(m.volumes_included) ?? "\(m.totalVolumes)") : "\(volumeCount(m))")
+                stat(m.isOmnibus ? "Volumes Included" : "Volumes", volumesStatText(m))
                 stat("Price", m.priceValue.euro, color: Theme.primary)
                 if !m.isOmnibus { stat("In Collection", "\(owned.count) / \(volumeCount(m))") }
             }
@@ -108,13 +106,39 @@ struct MangaDetailView: View {
         }
     }
 
+    private func omnibusLine(of: String, included: String) -> Text {
+        let lead: Text = Text("Omnibus edition of ").foregroundStyle(Theme.muted)
+        let name: Text = Text(of).foregroundStyle(Theme.primary).bold()
+        let tail: Text = Text(" · \(included)").foregroundStyle(Theme.muted)
+        return lead + name + tail
+    }
+
+    private func volumesStatText(_ m: Manga) -> String {
+        if m.isOmnibus { return nonEmpty(m.volumes_included) ?? String(m.totalVolumes) }
+        return String(volumeCount(m))
+    }
+
+    private func labeledCount(_ label: String, _ value: String) -> Text {
+        let l: Text = Text(label).foregroundStyle(Theme.muted)
+        let v: Text = Text(value).bold()
+        return l + v
+    }
+
+    private func readCountText(_ value: String) -> Text {
+        let icon: Text = Text(Image(systemName: "checkmark.circle")).foregroundStyle(Theme.emerald)
+        return icon + labeledCount(" Read: ", value)
+    }
+
     /// "Series Progress" card (owned vs. read), new in the web app.
     private func seriesProgress(_ m: Manga) -> some View {
         let total = volumeCount(m)
         let ownedCount = owned.count
         let readCount = owned.values.filter { completedIds.contains($0) }.count
-        let collPct = total > 0 ? min(100, Int((Double(ownedCount) / Double(total) * 100).rounded())) : 0
-        let readPct = ownedCount > 0 ? Int((Double(readCount) / Double(ownedCount) * 100).rounded()) : 0
+        let collRatio: Double = total > 0 ? Double(ownedCount) / Double(total) : 0
+        let readRatio: Double = ownedCount > 0 ? Double(readCount) / Double(ownedCount) : 0
+        let collPct: Int = min(100, Int((collRatio * 100).rounded()))
+        let readPct: Int = Int((readRatio * 100).rounded())
+        let unreadCount: Int = ownedCount - readCount
         return VStack(alignment: .leading, spacing: 10) {
             HStack {
                 Label("Series Progress", systemImage: "books.vertical").font(.subheadline.weight(.black)).labelStyle(TintedIconLabelStyle())
@@ -122,9 +146,9 @@ struct MangaDetailView: View {
                 NavigationLink(value: Route.series) { Text("All series").font(.caption.weight(.bold)).foregroundStyle(Theme.primary) }
             }
             HStack(spacing: 14) {
-                (Text("Owned: ").foregroundStyle(Theme.muted) + Text("\(ownedCount) / \(total)").bold())
-                (Text(Image(systemName: "checkmark.circle")).foregroundStyle(Theme.emerald) + Text(" Read: ").foregroundStyle(Theme.muted) + Text("\(readCount)").bold())
-                (Text("Unread: ").foregroundStyle(Theme.muted) + Text("\(ownedCount - readCount)").bold())
+                labeledCount("Owned: ", "\(ownedCount) / \(total)")
+                readCountText(String(readCount))
+                labeledCount("Unread: ", String(unreadCount))
             }
             .font(.caption)
             ProgressBar(value: Double(collPct) / 100, height: 6)
@@ -179,6 +203,9 @@ struct MangaDetailView: View {
         let isOwned = owned[key] != nil
         let isWished = wished[key] != nil
         let url = coverURL(v)
+        let wishStroke: Color = isWished ? Theme.red.opacity(0.6) : Theme.border
+        let strokeColor: Color = isOwned ? Theme.primary : wishStroke
+        let strokeWidth: CGFloat = isOwned ? 2 : 1
         return VStack(spacing: 6) {
             NavigationLink(value: Route.volume(mangaId: m.id, volume: v)) {
                 Color.clear.aspectRatio(2/3, contentMode: .fit)
@@ -196,7 +223,7 @@ struct MangaDetailView: View {
                         }
                     }
                     .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(isOwned ? Theme.primary : (isWished ? Theme.red.opacity(0.6) : Theme.border), lineWidth: isOwned ? 2 : 1))
+                    .overlay(RoundedRectangle(cornerRadius: 10).stroke(strokeColor, lineWidth: strokeWidth))
             }
             .buttonStyle(.plain)
             .overlay(alignment: .topTrailing) {
@@ -218,9 +245,9 @@ struct MangaDetailView: View {
         Button(action: action) {
             ZStack {
                 Circle().fill(active ? color : Theme.background.opacity(0.75))
-                Circle().stroke(active ? .clear : color.opacity(0.5))
+                Circle().stroke(active ? Color.clear : color.opacity(0.5))
                 if loading { ProgressView().controlSize(.mini).tint(.white) }
-                else { Image(systemName: icon).font(.system(size: 12, weight: .bold)).foregroundStyle(active ? .white : color) }
+                else { Image(systemName: icon).font(.system(size: 12, weight: .bold)).foregroundStyle(active ? Color.white : color) }
             }
             .frame(width: 30, height: 30)
             .shadow(radius: 4)
@@ -232,6 +259,11 @@ struct MangaDetailView: View {
     // MARK: Data
 
     private struct VolRef: Decodable { let id: String; let volume_number: Double?; let edition: String?; let status: String?; let read: Bool? }
+
+    private static func isCompleted(_ r: VolRef) -> Bool {
+        if let s = r.status { return s == "completed" }
+        return r.read ?? false
+    }
 
     private static func map(_ refs: [VolRef]) -> [String: String] {
         var m: [String: String] = [:]
@@ -252,7 +284,7 @@ struct MangaDetailView: View {
             let w = try await wT
             manga = m
             owned = Self.map(c.items)
-            completedIds = Set(c.items.filter { ($0.status ?? (($0.read ?? false) ? "completed" : "plan_to_read")) == "completed" }.map(\.id))
+            completedIds = Set(c.items.filter { Self.isCompleted($0) }.map(\.id))
             wished = Self.map(w.items)
             loading = false
             if !m.isOmnibus {

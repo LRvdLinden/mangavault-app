@@ -98,7 +98,7 @@ struct VolumeDetailView: View {
             HStack(spacing: 6) {
                 if m.isShonenJump { Badge(text: "SHONEN JUMP") }
                 if let p = nonEmpty(m.publisher) { Badge(text: p.uppercased(), fg: Theme.muted, bg: Theme.card, ring: Theme.border) }
-                if let item { Badge(text: item.effectiveStatus.volumeLabel.uppercased(), fg: item.effectiveStatus == .on_hold ? .black : .white, bg: statusBg(item.effectiveStatus)) }
+                if let item { Badge(text: item.effectiveStatus.volumeLabel.uppercased(), fg: item.effectiveStatus == .on_hold ? Color.black : Color.white, bg: statusBg(item.effectiveStatus)) }
             }
             NavigationLink(value: Route.manga(m.id)) {
                 Text(m.title).font(.system(size: 28, weight: .black)).tracking(-1).foregroundStyle(Theme.foreground)

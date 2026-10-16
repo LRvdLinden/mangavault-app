@@ -341,7 +341,8 @@ struct RewardsView: View {
     private func historyRow(_ item: RewardHistoryItem) -> some View {
         let date = ServerDate.parse(nonEmpty(item.granted_at) ?? item.created_date)
         let dateText = date.map { $0.formatted(date: .abbreviated, time: .shortened) } ?? ""
-        let kind = RewardHistoryItem.kindLabels[item.kind ?? ""] ?? (item.kind ?? "")
+        let rawKind: String = item.kind ?? ""
+        let kind: String = RewardHistoryItem.kindLabels[rawKind] ?? rawKind
         let duplicate = item.status == "duplicate"
         return VStack(alignment: .leading, spacing: 4) {
             HStack {

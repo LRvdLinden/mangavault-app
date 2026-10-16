@@ -12,7 +12,7 @@ struct WishlistView: View {
                 ScreenHeader(lead: "MY", accent: "WISHLIST", accentColor: Theme.red, subtitle: "Manga volumes you want to buy next.")
                 HStack(spacing: 10) {
                     StatCard(icon: "heart", label: "Items", value: "\(items.count)", accent: Theme.red)
-                    StatCard(icon: "eurosign.circle", label: "Total Value", value: items.reduce(0.0) { $0 + ($1.price ?? 0) }.euro, accent: Theme.red)
+                    StatCard(icon: "eurosign.circle", label: "Total Value", value: totalValue.euro, accent: Theme.red)
                 }
                 if loading && items.isEmpty {
                     LoadingView()
@@ -33,12 +33,25 @@ struct WishlistView: View {
         .task(id: app.dataVersion) { await load() }
     }
 
+    private func badgeText(_ w: WishlistItem) -> String {
+        if w.isOmnibus { return "3-IN-1" }
+        return "VOL. \(w.volume ?? 0)"
+    }
+
+    private func badgeIcon(_ w: WishlistItem) -> String? {
+        w.isOmnibus ? "books.vertical" : nil
+    }
+
+    private var totalValue: Double {
+        items.reduce(0.0) { (sum: Double, i: WishlistItem) -> Double in sum + (i.price ?? 0) }
+    }
+
     private func card(_ w: WishlistItem) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            NavigationLink(value: w.isOmnibus || w.volume == nil ? Route.manga(w.manga_id ?? "") : Route.volume(mangaId: w.manga_id ?? "", volume: w.volume!)) {
+            NavigationLink(value: route(for: w)) {
                 CoverView(info: CoverInfo(wish: w))
                     .overlay(alignment: .topTrailing) {
-                        Badge(text: w.isOmnibus ? "3-IN-1" : "VOL. \(w.volume ?? 0)", icon: w.isOmnibus ? "books.vertical" : nil,
+                        Badge(text: badgeText(w), icon: badgeIcon(w),
                               fg: Theme.red, bg: Theme.background.opacity(0.85), ring: Theme.red.opacity(0.5)).padding(8)
                     }
                     .overlay(alignment: .topLeading) {
@@ -72,6 +85,32 @@ struct WishlistView: View {
         }
     }
 
+    private static func collectionPayload(from w: WishlistItem) -> [String: Any] {
+        let title: String = w.title ?? ""
+        var d: [String: Any] = [:]
+        d["manga_id"] = (w.manga_id ?? "") as String
+        d["title"] = title
+        if let v = w.volume { d["volume_number"] = v } else { d["volume_number"] = NSNull() }
+        d["volume_cover_url"] = (w.volume_cover_url ?? "") as String
+        d["cover_image_url"] = (w.cover_image_url ?? "") as String
+        d["cover_seed"] = (w.cover_seed ?? title) as String
+        d["publisher"] = (w.publisher ?? "") as String
+        let price: Double = w.price ?? 0
+        d["price"] = price
+        let sj: Bool = w.is_shonen_jump ?? false
+        d["is_shonen_jump"] = sj
+        d["edition"] = (w.edition ?? "standard") as String
+        d["volumes_included"] = (w.volumes_included ?? "") as String
+        d["omnibus_of"] = (w.omnibus_of ?? "") as String
+        d["read"] = false
+        return d
+    }
+
+    private func route(for w: WishlistItem) -> Route {
+        if !w.isOmnibus, let v = w.volume { return .volume(mangaId: w.manga_id ?? "", volume: v) }
+        return .manga(w.manga_id ?? "")
+    }
+
     private func load() async {
         loading = true
         do { items = try await VaultService.wishlist() }
@@ -83,21 +122,8 @@ struct WishlistView: View {
     private func bought(_ w: WishlistItem) async {
         moving = w.id; defer { moving = nil }
         do {
-            _ = try await Base44Client.shared.create("CollectionItem", [
-                "manga_id": w.manga_id ?? "",
-                "title": w.title ?? "",
-                "volume_number": w.volume.map { $0 as Any } ?? NSNull(),
-                "volume_cover_url": w.volume_cover_url ?? "",
-                "cover_image_url": w.cover_image_url ?? "",
-                "cover_seed": w.cover_seed ?? (w.title ?? ""),
-                "publisher": w.publisher ?? "",
-                "price": w.price ?? 0,
-                "is_shonen_jump": w.is_shonen_jump ?? false,
-                "edition": w.edition ?? "standard",
-                "volumes_included": w.volumes_included ?? "",
-                "omnibus_of": w.omnibus_of ?? "",
-                "read": false
-            ], CollectionItem.self)
+            let payload: [String: Any] = Self.collectionPayload(from: w)
+            _ = try await Base44Client.shared.create("CollectionItem", payload, CollectionItem.self)
             try await Base44Client.shared.delete("WishlistItem", w.id)
             items.removeAll { $0.id == w.id }
             app.show("Moved \"\(w.title ?? "")\" to your collection")

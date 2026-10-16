@@ -133,10 +133,16 @@ struct DashboardView: View {
     private var header: some View {
         VStack(alignment: .leading, spacing: 4) {
             Label("DASHBOARD", systemImage: "sparkles").font(.caption.weight(.bold)).tracking(2).foregroundStyle(Theme.primary)
-            (Text("Welcome back, ").foregroundStyle(Theme.primary) + Text(name).foregroundStyle(Theme.foreground))
+            welcomeText
                 .font(.system(size: 30, weight: .black)).tracking(-1)
             Text("Level \(level.level) · \(level.total) XP · \(streak)-day streak").font(.subheadline).foregroundStyle(Theme.muted)
         }
+    }
+
+    private var welcomeText: Text {
+        let first: Text = Text("Welcome back, ").foregroundStyle(Theme.primary)
+        let second: Text = Text(name).foregroundStyle(Theme.foreground)
+        return first + second
     }
 
     private var levelHero: some View {

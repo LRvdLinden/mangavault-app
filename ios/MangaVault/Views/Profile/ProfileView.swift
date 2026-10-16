@@ -334,21 +334,34 @@ struct ProfileView: View {
         } catch { app.fail("Upload failed", error) }
     }
 
+    private static func splitList(_ s: String) -> [String] {
+        let parts: [String] = s.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }
+        return parts.filter { !$0.isEmpty }
+    }
+
     private func save(_ p: UserProfile) async {
         saving = true; defer { saving = false }
         do {
-            let split: (String) -> [String] = { $0.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty } }
-            let data: [String: Any] = [
-                "display_name": displayName, "bio": bio, "avatar_url": avatarURL, "banner_url": bannerURL,
-                "profile_public": profilePublic, "collection_public": collectionPublic,
-                "theme_id": p.theme_id ?? "kaiachu-orange",
-                "favorite_manga": split(favManga), "favorite_characters": split(favCharacters), "favorite_genres": split(favGenres)
-            ]
+            let mangaList: [String] = Self.splitList(favManga)
+            let characterList: [String] = Self.splitList(favCharacters)
+            let genreList: [String] = Self.splitList(favGenres)
+            let themeId: String = p.theme_id ?? "kaiachu-orange"
+            var data: [String: Any] = [:]
+            data["display_name"] = displayName
+            data["bio"] = bio
+            data["avatar_url"] = avatarURL
+            data["banner_url"] = bannerURL
+            data["profile_public"] = profilePublic
+            data["collection_public"] = collectionPublic
+            data["theme_id"] = themeId
+            data["favorite_manga"] = mangaList
+            data["favorite_characters"] = characterList
+            data["favorite_genres"] = genreList
             try await Base44Client.shared.update("UserProfile", p.id, data)
             var updated = p
             updated.display_name = displayName; updated.bio = bio; updated.avatar_url = avatarURL; updated.banner_url = bannerURL
             updated.profile_public = profilePublic; updated.collection_public = collectionPublic
-            updated.favorite_manga = split(favManga); updated.favorite_characters = split(favCharacters); updated.favorite_genres = split(favGenres)
+            updated.favorite_manga = mangaList; updated.favorite_characters = characterList; updated.favorite_genres = genreList
             await ProfileStore.shared.set(updated)
             profile = updated
             app.show("Profile saved")

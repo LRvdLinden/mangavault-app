@@ -419,14 +419,18 @@ struct CalendarView: View {
         }
         saving = true
         defer { saving = false }
+        let minutes: Int = Int(lvTrim(fMin)) ?? 0
+        let chaptersRead: Int = Int(lvTrim(fCh)) ?? 0
+        let volumeValue: Any = lvNumberOrNull(fVol)
+        let notesText: String = lvTrim(fNotes)
         let payload: [String: Any] = [
             "manga_id": "",
             "title": title,
-            "volume_number": lvNumberOrNull(fVol),
+            "volume_number": volumeValue,
             "date": date,
-            "minutes": Int(lvTrim(fMin)) ?? 0,
-            "chapters_read": Int(lvTrim(fCh)) ?? 0,
-            "notes": lvTrim(fNotes)
+            "minutes": minutes,
+            "chapters_read": chaptersRead,
+            "notes": notesText
         ]
         do {
             _ = try await Base44Client.shared.create("ReadingSession", payload, ReadingSession.self)
@@ -2241,8 +2245,9 @@ fileprivate struct LVTierEditor: View {
         defer { saving = false }
         let tiers: [[String: Any]] = draft.tiers.map { ["name": $0.name, "color": $0.color] }
         let entries: [[String: Any]] = draft.entries.map { $0.entry.json }
+        let listName: String = name.isEmpty ? "My Tier List" : name
         let payload: [String: Any] = [
-            "name": name.isEmpty ? "My Tier List" : name,
+            "name": listName,
             "description": draft.description,
             "list_type": draft.listType,
             "tiers": tiers,
@@ -2613,15 +2618,17 @@ struct RouletteView: View {
         guard !wishIds.contains(m.id) else { return }
         busy = true
         defer { busy = false }
-        let payload: [String: Any] = [
-            "manga_id": m.id,
-            "title": m.title,
-            "cover_image_url": m.cover_image_url ?? "",
-            "cover_seed": m.title,
-            "publisher": m.publisher ?? "",
-            "price": m.price ?? 0,
-            "edition": "standard"
-        ]
+        let coverURL: String = m.cover_image_url ?? ""
+        let publisherName: String = m.publisher ?? ""
+        let price: Double = m.price ?? 0
+        var payload: [String: Any] = [:]
+        payload["manga_id"] = m.id
+        payload["title"] = m.title
+        payload["cover_image_url"] = coverURL
+        payload["cover_seed"] = m.title
+        payload["publisher"] = publisherName
+        payload["price"] = price
+        payload["edition"] = "standard"
         do {
             _ = try await Base44Client.shared.create("WishlistItem", payload, WishlistItem.self)
             wishIds.insert(m.id)
@@ -2635,18 +2642,21 @@ struct RouletteView: View {
     private func startTracking(_ m: Manga) async {
         busy = true
         defer { busy = false }
-        let payload: [String: Any] = [
-            "manga_id": m.id,
-            "title": "\(m.title) Vol. 1",
-            "volume_number": 1,
-            "cover_image_url": m.cover_image_url ?? "",
-            "cover_seed": m.cover_seed ?? m.title,
-            "publisher": m.publisher ?? "",
-            "price": m.price ?? 0,
-            "edition": "standard",
-            "status": "reading",
-            "read": false
-        ]
+        let coverURL: String = m.cover_image_url ?? ""
+        let seed: String = m.cover_seed ?? m.title
+        let publisherName: String = m.publisher ?? ""
+        let price: Double = m.price ?? 0
+        var payload: [String: Any] = [:]
+        payload["manga_id"] = m.id
+        payload["title"] = "\(m.title) Vol. 1"
+        payload["volume_number"] = 1
+        payload["cover_image_url"] = coverURL
+        payload["cover_seed"] = seed
+        payload["publisher"] = publisherName
+        payload["price"] = price
+        payload["edition"] = "standard"
+        payload["status"] = "reading"
+        payload["read"] = false
         do {
             _ = try await Base44Client.shared.create("CollectionItem", payload, CollectionItem.self)
             ownedIds.insert(m.id)

@@ -74,7 +74,7 @@ struct TradingCardView: View {
                 Button(action: onFavorite) {
                     Text(favorite ? "★ Favorite" : "☆ Favorite").font(.system(size: 10, weight: .bold))
                         .frame(width: size.width).padding(.vertical, 5)
-                        .foregroundStyle(favorite ? .white : Theme.muted)
+                        .foregroundStyle(favorite ? Color.white : Theme.muted)
                         .background(favorite ? Theme.primary : Theme.secondary, in: RoundedRectangle(cornerRadius: 6))
                 }
                 .buttonStyle(.plain)

@@ -76,10 +76,12 @@ struct ConfettiView: View {
             let degrees: Double = Double.random(in: -125.0 ... -55.0)
             let angle: Double = degrees * Double.pi / 180
             let speed: CGFloat = CGFloat.random(in: 350...850)
-            return Particle(color: Self.colors.randomElement()!,
+            let vx: CGFloat = CGFloat(cos(angle)) * speed
+            let vy: CGFloat = CGFloat(sin(angle)) * speed
+            return Particle(color: Self.colors.randomElement() ?? Theme.primary,
                             x: 0.5,
-                            vx: CGFloat(cos(angle)) * speed,
-                            vy: CGFloat(sin(angle)) * speed,
+                            vx: vx,
+                            vy: vy,
                             spin: Double.random(in: -2...2),
                             size: CGFloat.random(in: 6...11),
                             circle: Bool.random())

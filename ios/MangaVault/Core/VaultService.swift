@@ -25,7 +25,14 @@ enum VaultService {
         struct G: Decodable { let id: String; let genre: String? }
         var map: [String: String] = [:]
         // Chunk to keep URLs a sensible length.
-        for chunk in stride(from: 0, to: ids.count, by: 150).map({ Array(ids[$0..<min($0 + 150, ids.count)]) }) {
+        var chunks: [[String]] = []
+        var start = 0
+        while start < ids.count {
+            let end: Int = min(start + 150, ids.count)
+            chunks.append(Array(ids[start..<end]))
+            start = end
+        }
+        for chunk in chunks {
             let page = try await api.list("Manga", G.self, query: ["id": ["$in": chunk]], limit: 500, fields: ["id", "genre", "title"])
             for m in page.items { if let g = m.genre, !g.isEmpty { map[m.id] = g } }
         }
@@ -55,36 +62,43 @@ enum VaultService {
     // MARK: Activity log
 
     static func log(_ type: String, mangaId: String?, title: String?, volume: Int?, meta: String = "") {
+        var payload: [String: Any] = [:]
+        payload["type"] = type
+        payload["manga_id"] = (mangaId ?? "") as String
+        payload["title"] = (title ?? "") as String
+        if let volume { payload["volume_number"] = volume } else { payload["volume_number"] = NSNull() }
+        payload["meta"] = meta
+        let body: [String: Any] = payload
         Task.detached {
-            _ = try? await Base44Client.shared.create("ReadingActivity", [
-                "type": type,
-                "manga_id": mangaId ?? "",
-                "title": title ?? "",
-                "volume_number": volume.map { $0 as Any } ?? NSNull(),
-                "meta": meta
-            ], ReadingActivity.self)
+            _ = try? await Base44Client.shared.create("ReadingActivity", body, ReadingActivity.self)
         }
     }
 
     // MARK: Collection / wishlist creation payloads
 
     static func collectionPayload(manga: Manga, volume: Int?, volumeCover: String, status: ReadStatus? = nil) -> [String: Any] {
-        var d: [String: Any] = [
-            "manga_id": manga.id,
-            "title": volume.map { "\(manga.title) Vol. \($0)" } ?? manga.title,
-            "volume_number": volume.map { $0 as Any } ?? NSNull(),
-            "cover_image_url": manga.cover_image_url ?? "",
-            "cover_seed": manga.cover_seed ?? manga.title,
-            "publisher": manga.publisher ?? "",
-            "price": manga.price ?? 0,
-            "is_shonen_jump": manga.isShonenJump,
-            "edition": volume == nil ? "omnibus" : "standard",
-            "read": false
-        ]
+        var d: [String: Any] = [:]
+        d["manga_id"] = manga.id
+        if let volume {
+            d["title"] = "\(manga.title) Vol. \(volume)"
+            d["volume_number"] = volume
+            d["edition"] = "standard"
+        } else {
+            d["title"] = manga.title
+            d["volume_number"] = NSNull()
+            d["edition"] = "omnibus"
+        }
+        d["cover_image_url"] = (manga.cover_image_url ?? "") as String
+        d["cover_seed"] = (manga.cover_seed ?? manga.title) as String
+        d["publisher"] = (manga.publisher ?? "") as String
+        let price: Double = manga.price ?? 0
+        d["price"] = price
+        d["is_shonen_jump"] = manga.isShonenJump
+        d["read"] = false
         if volume != nil { d["volume_cover_url"] = volumeCover }
         if volume == nil {
-            d["volumes_included"] = manga.volumes_included ?? ""
-            d["omnibus_of"] = manga.omnibus_of ?? ""
+            d["volumes_included"] = (manga.volumes_included ?? "") as String
+            d["omnibus_of"] = (manga.omnibus_of ?? "") as String
         }
         if let status { d["status"] = status.rawValue }
         return d

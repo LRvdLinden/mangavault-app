@@ -87,8 +87,13 @@ struct LogoMark: View {
 
 struct Wordmark: View {
     var size: CGFloat = 20
+    private var wordmarkText: Text {
+        let first: Text = Text("MANGA").foregroundStyle(Theme.foreground)
+        let second: Text = Text("VAULT").foregroundStyle(Theme.primary)
+        return first + second
+    }
     var body: some View {
-        (Text("MANGA").foregroundStyle(Theme.foreground) + Text("VAULT").foregroundStyle(Theme.primary))
+        wordmarkText
             .font(.system(size: size, weight: .black))
             .tracking(-1)
     }

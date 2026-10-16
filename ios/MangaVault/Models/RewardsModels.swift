@@ -239,7 +239,10 @@ struct EventQuestDef: Codable, Hashable, Identifiable {
         "community_goal": "Reach the community goal",
         "quests_done": "Complete other quests of this event"
     ]
-    var kindLabel: String { EventQuestDef.kindLabels[kind ?? ""] ?? (kind ?? "") }
+    var kindLabel: String {
+        let k: String = kind ?? ""
+        return EventQuestDef.kindLabels[k] ?? k
+    }
 }
 
 struct CommunityEvent: Codable, Hashable, Identifiable {
@@ -287,7 +290,10 @@ struct CommunityEvent: Codable, Hashable, Identifiable {
         "minutes": "reading minutes", "chapters": "chapters read", "series": "new series tracked", "rated": "manga rated"
     ]
 
-    var typeLabel: String { CommunityEvent.typeLabels[type ?? ""] ?? (type ?? "") }
+    var typeLabel: String {
+        let t: String = type ?? ""
+        return CommunityEvent.typeLabels[t] ?? t
+    }
     var accent: String { nonEmpty(accent_color) ?? "#FF7A00" }
     var heroImage: String? { nonEmpty(background_url) ?? nonEmpty(banner_url) }
     var displayTitle: String { [nonEmpty(icon), title].compactMap { $0 }.joined(separator: " ") }
@@ -410,7 +416,11 @@ struct RoomItem: Codable, Hashable {
         scale = try? c.decode(Double.self, forKey: .scale)
     }
     var json: [String: Any] {
-        ["kind": kind, "ref": ref ?? "", "label": label ?? "", "art": art ?? "", "x": x, "y": y, "scale": scale ?? 1]
+        let refValue: String = ref ?? ""
+        let labelValue: String = label ?? ""
+        let artValue: String = art ?? ""
+        let scaleValue: Double = scale ?? 1
+        return ["kind": kind, "ref": refValue, "label": labelValue, "art": artValue, "x": x, "y": y, "scale": scaleValue]
     }
 }
 

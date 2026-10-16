@@ -60,7 +60,7 @@ struct ScreenHeader: View {
                 .font(.caption.weight(.bold))
                 .foregroundStyle(Theme.primary)
             }
-            (Text(lead + " ").foregroundStyle(Theme.foreground) + Text(accent).foregroundStyle(accentColor))
+            titleText
                 .font(.system(size: 32, weight: .black))
                 .tracking(-1)
             if let subtitle {
@@ -68,6 +68,14 @@ struct ScreenHeader: View {
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+    }
+}
+
+extension ScreenHeader {
+    fileprivate var titleText: Text {
+        let first: Text = Text(lead + " ").foregroundStyle(Theme.foreground)
+        let second: Text = Text(accent).foregroundStyle(accentColor)
+        return first + second
     }
 }
 

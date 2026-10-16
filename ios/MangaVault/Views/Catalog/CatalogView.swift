@@ -67,8 +67,7 @@ struct CatalogView: View {
                     .padding(.horizontal, 12).padding(.vertical, 5)
                     .background(Theme.primary.opacity(0.1), in: Capsule())
                     .overlay(Capsule().stroke(Theme.primary.opacity(0.3)))
-                (Text(mode == .catalog ? "THE MANGA " : "FIND YOUR NEXT ").foregroundStyle(Theme.foreground)
-                 + Text(mode == .catalog ? "VAULT" : "READ").foregroundStyle(Theme.primary))
+                heroTitle
                     .font(.system(size: 36, weight: .black)).tracking(-1.5)
                 Text(mode == .catalog
                      ? "The full MangaDex catalog, in English. Open a title to add the individual volumes you own, track your reading, and total your collection's value."
@@ -79,6 +78,20 @@ struct CatalogView: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .overlay(alignment: .bottom) { Rectangle().fill(Theme.primary.opacity(0.1)).frame(height: 1) }
+    }
+
+    private var heroTitle: Text {
+        let lead: String = mode == .catalog ? "THE MANGA " : "FIND YOUR NEXT "
+        let accent: String = mode == .catalog ? "VAULT" : "READ"
+        let first: Text = Text(lead).foregroundStyle(Theme.foreground)
+        let second: Text = Text(accent).foregroundStyle(Theme.primary)
+        return first + second
+    }
+
+    private static func filterTitle(_ f: String) -> String {
+        if f == "all" { return "All" }
+        if f == "shonen_jump" { return "Shonen Jump" }
+        return f
     }
 
     private var filterBar: some View {
@@ -97,7 +110,7 @@ struct CatalogView: View {
                     .disabled(items.isEmpty)
                 }
                 ForEach(Self.filters, id: \.self) { f in
-                    Chip(title: f == "all" ? "All" : (f == "shonen_jump" ? "Shonen Jump" : f), selected: filter == f) { filter = f }
+                    Chip(title: Self.filterTitle(f), selected: filter == f) { filter = f }
                 }
             }
             .padding(.horizontal, 16).padding(.vertical, 12)
@@ -145,7 +158,12 @@ struct CatalogView: View {
 
     private func titleQuery() -> [String: Any] {
         let s = debounced.trimmingCharacters(in: .whitespaces)
-        return s.isEmpty ? [:] : ["title": ["$regex": NSRegularExpression.escapedPattern(for: s), "$options": "i"]]
+        var q: [String: Any] = [:]
+        if !s.isEmpty {
+            let regex: [String: Any] = ["$regex": NSRegularExpression.escapedPattern(for: s), "$options": "i"]
+            q["title"] = regex
+        }
+        return q
     }
 
     private func buildQuery() -> [String: Any] {

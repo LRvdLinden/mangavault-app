@@ -28,7 +28,13 @@ struct StatisticsView: View {
             if let start, let d = fmt.date(from: day), d < start { continue }
             counts[day, default: 0] += 1
         }
-        return counts.sorted { $0.key < $1.key }.map { ChartDatum(name: range == 0 ? $0.key : String($0.key.dropFirst(5)), value: $0.value) }
+        let allTime: Bool = range == 0
+        var out: [ChartDatum] = []
+        for key in counts.keys.sorted() {
+            let label: String = allTime ? key : String(key.dropFirst(5))
+            out.append(ChartDatum(name: label, value: counts[key] ?? 0))
+        }
+        return out
     }
 
     private var rangeLabel: String {

@@ -171,11 +171,17 @@ struct QuestsView: View {
         .task(id: app.dataVersion) { await load() }
     }
 
+    private func questTitle(_ title: String) -> Text {
+        let first: Text = Text(title + " ").foregroundStyle(Theme.foreground)
+        let second: Text = Text("QUESTS").foregroundStyle(Theme.primary)
+        return first + second
+    }
+
     private func sectionHeader(_ title: String, icon: String, note: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 6) {
                 Image(systemName: icon).foregroundStyle(Theme.primary)
-                (Text(title + " ").foregroundStyle(Theme.foreground) + Text("QUESTS").foregroundStyle(Theme.primary))
+                questTitle(title)
                     .font(.title3.weight(.black))
             }
             Text(note).font(.caption).foregroundStyle(Theme.muted)

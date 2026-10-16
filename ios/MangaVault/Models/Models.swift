@@ -256,7 +256,9 @@ struct TierEntry: Codable, Hashable {
     }
 
     var json: [String: Any] {
-        ["kind": kind, "ref_id": ref_id ?? "", "label": label, "cover_url": cover_url ?? "", "tier": tier, "order": order]
+        let ref: String = ref_id ?? ""
+        let cover: String = cover_url ?? ""
+        return ["kind": kind, "ref_id": ref, "label": label, "cover_url": cover, "tier": tier, "order": order]
     }
 }
 

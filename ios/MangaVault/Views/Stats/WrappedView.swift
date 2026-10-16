@@ -29,7 +29,9 @@ struct WrappedView: View {
 
     private var years: [Int] {
         var s: Set<Int> = [Calendar.current.component(.year, from: Date())]
-        for d in items.compactMap(\.created_date) + activities.compactMap(\.created_date) { if let y = Int(d.prefix(4)) { s.insert(y) } }
+        var dates: [String] = items.compactMap { $0.created_date }
+        dates.append(contentsOf: activities.compactMap { $0.created_date })
+        for d in dates { if let y = Int(d.prefix(4)) { s.insert(y) } }
         return s.sorted(by: >)
     }
 
@@ -63,7 +65,7 @@ struct WrappedView: View {
                 } else {
                     wrappedCard
                     Button {
-                        let renderer = ImageRenderer(content: wrappedCard.frame(width: 390).padding(12).background(Color(hex: "#101010")).environment(\.colorScheme, .dark))
+                        let renderer = ImageRenderer(content: shareContent)
                         renderer.scale = max(displayScale, 2)
                         if let img = renderer.uiImage { shareImage = ShareableImage(image: img) }
                         else { app.show("Export failed", error: true) }
@@ -89,13 +91,32 @@ struct WrappedView: View {
         .sheet(item: $shareImage) { s in ActivityView(items: [s.image]).presentationDetents([.medium, .large]) }
     }
 
+    private var shareContent: some View {
+        wrappedCard
+            .frame(width: 390)
+            .padding(12)
+            .background(Color(hex: "#101010"))
+            .environment(\.colorScheme, .dark)
+    }
+
+    private func barHeight(_ value: Int, max maxV: Int) -> CGFloat {
+        let ratio: CGFloat = CGFloat(value) / CGFloat(maxV)
+        let h: CGFloat = 90 * ratio
+        return Swift.max(4, h)
+    }
+
     private var wrappedCard: some View {
         let accent = Theme.primary
         let pi = periodItems, pa = periodActs
         let completed = pa.filter { $0.type == "completed" }.count
         let progress = pa.filter { $0.type == "progress" }.count
         let topGenre = VaultService.genreDistribution(pi, genreMap, top: 1).first?.0
-        let topRated = pi.filter { ($0.rating ?? 0) > 0 }.max { ($0.rating ?? 0) < ($1.rating ?? 0) }
+        let ratedItems: [CollectionItem] = pi.filter { ($0.rating ?? 0) > 0 }
+        let topRated: CollectionItem? = ratedItems.max { a, b in
+            let ra: Double = a.rating ?? 0
+            let rb: Double = b.rating ?? 0
+            return ra < rb
+        }
         let favorite = pi.first { $0.isFavorite }
         var perDay: [String: Int] = [:]
         pa.forEach { perDay[$0.day, default: 0] += 1 }
@@ -137,7 +158,7 @@ struct WrappedView: View {
                     HStack(alignment: .bottom, spacing: 3) {
                         ForEach(days) { d in
                             RoundedRectangle(cornerRadius: 2).fill(accent)
-                                .frame(height: max(4, 90 * CGFloat(d.value) / CGFloat(maxV)))
+                                .frame(height: barHeight(d.value, max: maxV))
                                 .frame(maxWidth: .infinity)
                         }
                     }

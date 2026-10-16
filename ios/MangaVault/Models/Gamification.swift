@@ -80,22 +80,22 @@ struct AchievementDef: Identifiable {
     let value: (AchievementStats) -> Int
 
     static let all: [AchievementDef] = [
-        .init(id: "first_add", name: "First Addition", desc: "Add your first manga to your collection", rarity: .common, reward: 50, icon: "+", total: 1, value: { $0.vol }),
-        .init(id: "collector", name: "Collector", desc: "Collect 10 manga volumes", rarity: .common, reward: 100, icon: "📚", total: 10, value: { $0.vol }),
-        .init(id: "dedicated", name: "Dedicated Collector", desc: "Collect 50 manga volumes", rarity: .rare, reward: 300, icon: "🗂", total: 50, value: { $0.vol }),
-        .init(id: "expert", name: "Manga Expert", desc: "Collect 100 manga volumes", rarity: .epic, reward: 800, icon: "👑", total: 100, value: { $0.vol }),
-        .init(id: "first_chapter", name: "First Chapter", desc: "Record reading progress on a volume", rarity: .common, reward: 50, icon: "📖", total: 1, value: { $0.progressCount }),
-        .init(id: "getting_started", name: "Getting Started", desc: "Complete your first manga", rarity: .common, reward: 100, icon: "✓", total: 1, value: { $0.completed }),
-        .init(id: "completionist", name: "Completionist", desc: "Complete 10 manga", rarity: .rare, reward: 400, icon: "🏆", total: 10, value: { $0.completed }),
-        .init(id: "genre_explorer", name: "Genre Explorer", desc: "Collect manga from 5 different genres", rarity: .rare, reward: 200, icon: "🧭", total: 5, value: { $0.genres }),
-        .init(id: "variety_fan", name: "Variety Fan", desc: "Explore 10 different genres", rarity: .epic, reward: 400, icon: "🎨", total: 10, value: { $0.genres }),
-        .init(id: "rating_master", name: "Rating Master", desc: "Rate 25 manga", rarity: .rare, reward: 250, icon: "⭐", total: 25, value: { $0.rated }),
-        .init(id: "organized", name: "Organized Reader", desc: "Add notes to 10 manga", rarity: .common, reward: 150, icon: "📝", total: 10, value: { $0.notes }),
-        .init(id: "first_volume", name: "First Volume", desc: "Complete your first volume read", rarity: .common, reward: 100, icon: "✓", total: 1, value: { $0.completed }),
-        .init(id: "streak", name: "Consistent Reader", desc: "Maintain a 7-day reading streak", rarity: .epic, reward: 500, icon: "🔥", total: 7, value: { $0.streak }),
-        .init(id: "series_explorer", name: "Series Explorer", desc: "Collect 15 different manga series", rarity: .epic, reward: 500, icon: "🧭", total: 15, value: { $0.series }),
-        .init(id: "manga_master", name: "Manga Master", desc: "Collect 200 manga volumes", rarity: .legendary, reward: 1500, icon: "👑", total: 200, value: { $0.vol }),
-        .init(id: "unbreakable", name: "Unbreakable", desc: "Maintain a 30-day reading streak", rarity: .legendary, reward: 1200, icon: "🔥", total: 30, value: { $0.longStreak })
+        AchievementDef(id: "first_add", name: "First Addition", desc: "Add your first manga to your collection", rarity: .common, reward: 50, icon: "+", total: 1, value: { $0.vol }),
+        AchievementDef(id: "collector", name: "Collector", desc: "Collect 10 manga volumes", rarity: .common, reward: 100, icon: "📚", total: 10, value: { $0.vol }),
+        AchievementDef(id: "dedicated", name: "Dedicated Collector", desc: "Collect 50 manga volumes", rarity: .rare, reward: 300, icon: "🗂", total: 50, value: { $0.vol }),
+        AchievementDef(id: "expert", name: "Manga Expert", desc: "Collect 100 manga volumes", rarity: .epic, reward: 800, icon: "👑", total: 100, value: { $0.vol }),
+        AchievementDef(id: "first_chapter", name: "First Chapter", desc: "Record reading progress on a volume", rarity: .common, reward: 50, icon: "📖", total: 1, value: { $0.progressCount }),
+        AchievementDef(id: "getting_started", name: "Getting Started", desc: "Complete your first manga", rarity: .common, reward: 100, icon: "✓", total: 1, value: { $0.completed }),
+        AchievementDef(id: "completionist", name: "Completionist", desc: "Complete 10 manga", rarity: .rare, reward: 400, icon: "🏆", total: 10, value: { $0.completed }),
+        AchievementDef(id: "genre_explorer", name: "Genre Explorer", desc: "Collect manga from 5 different genres", rarity: .rare, reward: 200, icon: "🧭", total: 5, value: { $0.genres }),
+        AchievementDef(id: "variety_fan", name: "Variety Fan", desc: "Explore 10 different genres", rarity: .epic, reward: 400, icon: "🎨", total: 10, value: { $0.genres }),
+        AchievementDef(id: "rating_master", name: "Rating Master", desc: "Rate 25 manga", rarity: .rare, reward: 250, icon: "⭐", total: 25, value: { $0.rated }),
+        AchievementDef(id: "organized", name: "Organized Reader", desc: "Add notes to 10 manga", rarity: .common, reward: 150, icon: "📝", total: 10, value: { $0.notes }),
+        AchievementDef(id: "first_volume", name: "First Volume", desc: "Complete your first volume read", rarity: .common, reward: 100, icon: "✓", total: 1, value: { $0.completed }),
+        AchievementDef(id: "streak", name: "Consistent Reader", desc: "Maintain a 7-day reading streak", rarity: .epic, reward: 500, icon: "🔥", total: 7, value: { $0.streak }),
+        AchievementDef(id: "series_explorer", name: "Series Explorer", desc: "Collect 15 different manga series", rarity: .epic, reward: 500, icon: "🧭", total: 15, value: { $0.series }),
+        AchievementDef(id: "manga_master", name: "Manga Master", desc: "Collect 200 manga volumes", rarity: .legendary, reward: 1500, icon: "👑", total: 200, value: { $0.vol }),
+        AchievementDef(id: "unbreakable", name: "Unbreakable", desc: "Maintain a 30-day reading streak", rarity: .legendary, reward: 1200, icon: "🔥", total: 30, value: { $0.longStreak })
     ]
 }
 
@@ -129,17 +129,17 @@ struct QuestDef: Identifiable, Hashable {
     let total: Int
 
     static let all: [QuestDef] = [
-        .init(id: "q_add", name: "Add a Manga", desc: "Add a manga to your collection today", reward: 30, bonus: false, key: "added", total: 1),
-        .init(id: "q_rate", name: "Rate a Manga", desc: "Rate a manga in your collection today", reward: 30, bonus: false, key: "rated", total: 1),
-        .init(id: "q_progress", name: "Update Progress", desc: "Update reading progress on a volume today", reward: 40, bonus: false, key: "progress", total: 1),
-        .init(id: "q_complete", name: "Complete a Manga", desc: "Complete a manga today", reward: 80, bonus: true, key: "completed", total: 1)
+        QuestDef(id: "q_add", name: "Add a Manga", desc: "Add a manga to your collection today", reward: 30, bonus: false, key: "added", total: 1),
+        QuestDef(id: "q_rate", name: "Rate a Manga", desc: "Rate a manga in your collection today", reward: 30, bonus: false, key: "rated", total: 1),
+        QuestDef(id: "q_progress", name: "Update Progress", desc: "Update reading progress on a volume today", reward: 40, bonus: false, key: "progress", total: 1),
+        QuestDef(id: "q_complete", name: "Complete a Manga", desc: "Complete a manga today", reward: 80, bonus: true, key: "completed", total: 1)
     ]
 
     static let weekly: [QuestDef] = [
-        .init(id: "w_active", name: "Active Week", desc: "Record reading activity on 3 different days this week", reward: 120, bonus: false, key: "activeDays", total: 3),
-        .init(id: "w_progress", name: "Keep Reading", desc: "Update reading progress on 3 volumes this week", reward: 150, bonus: false, key: "progress", total: 3),
-        .init(id: "w_add", name: "Grow the Vault", desc: "Add 3 manga to your collection this week", reward: 120, bonus: false, key: "added", total: 3),
-        .init(id: "w_complete", name: "Finish Strong", desc: "Complete 2 manga this week", reward: 250, bonus: true, key: "completed", total: 2)
+        QuestDef(id: "w_active", name: "Active Week", desc: "Record reading activity on 3 different days this week", reward: 120, bonus: false, key: "activeDays", total: 3),
+        QuestDef(id: "w_progress", name: "Keep Reading", desc: "Update reading progress on 3 volumes this week", reward: 150, bonus: false, key: "progress", total: 3),
+        QuestDef(id: "w_add", name: "Grow the Vault", desc: "Add 3 manga to your collection this week", reward: 120, bonus: false, key: "added", total: 3),
+        QuestDef(id: "w_complete", name: "Finish Strong", desc: "Complete 2 manga this week", reward: 250, bonus: true, key: "completed", total: 2)
     ]
 }
 
@@ -161,7 +161,10 @@ enum DayKey {
     /// Local `yyyy-MM-dd`, like the web app's `S_()` helper.
     static func local(_ date: Date = Date()) -> String {
         let c = Calendar.current.dateComponents([.year, .month, .day], from: date)
-        return String(format: "%04d-%02d-%02d", c.year ?? 0, c.month ?? 0, c.day ?? 0)
+        let y: Int = c.year ?? 0
+        let m: Int = c.month ?? 0
+        let d: Int = c.day ?? 0
+        return String(format: "%04d-%02d-%02d", y, m, d)
     }
 
     /// Consecutive-day streak ending today (or yesterday), based on activity days.
@@ -206,6 +209,8 @@ enum DayKey {
     static func isoWeek(_ date: Date = Date()) -> String {
         var cal = Calendar(identifier: .iso8601); cal.timeZone = .current
         let c = cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: date)
-        return String(format: "%04d-W%02d", c.yearForWeekOfYear ?? 0, c.weekOfYear ?? 0)
+        let y: Int = c.yearForWeekOfYear ?? 0
+        let w: Int = c.weekOfYear ?? 0
+        return String(format: "%04d-W%02d", y, w)
     }
 }
