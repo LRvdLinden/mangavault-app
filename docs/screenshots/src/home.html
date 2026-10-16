@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<title>Home – DashboardView</title>
+<link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body><script>
+// DashboardView (Views/Stats/DashboardView.swift), top of the scroll view.
+const { icon, statCard, progress, eventBanner, wordmark, bell } = MV;
+const EVENT = {
+  accent: "#8B5CF6", title: "🎃 Spooky Season Reading Marathon",
+  subtitle: "Read horror & mystery manga all month and unlock the limited Halloween card.",
+  start: "2026-10-01", end: "2026-10-31", points: 340, max: 500, countdown: [15, 14, 18, 42],
+};
+const content = `<div class="pad vstack" style="gap:22px">
+  <div class="vstack" style="gap:4px">
+    <div class="lbl c1 w7 trk2 pri">${icon("sparkles")}DASHBOARD</div>
+    <div style="font-size:30px;line-height:36px;font-weight:900;letter-spacing:-1px"><span class="pri">Welcome back, </span><span class="fg">kaiju_reader</span></div>
+    <div class="sub muted">Level 12 · 7240 XP · 9-day streak</div>
+  </div>
+
+  <div class="card hi vstack" style="padding:16px;gap:12px">
+    <div class="vstack" style="gap:6px">
+      <div class="hstack"><span class="hl w9 pri">Level 12</span><span class="spacer"></span><span class="c1 w7 muted">640 / 1200 XP to level 13</span></div>
+      ${progress(640 / 1200)}
+    </div>
+    <div class="hstack" style="gap:10px">
+      <div class="btn primary flex">${icon("books.vertical")}My Collection</div>
+      <div class="btn outline flex">${icon("book")}Continue Reading</div>
+    </div>
+  </div>
+
+  ${eventBanner(EVENT)}
+
+  <div class="grid2">
+    ${statCard("books.vertical", "Volumes", "148")}
+    ${statCard("book", "Reading", "12")}
+    ${statCard("checkmark.circle", "Completed", "87", "var(--emerald)")}
+    ${statCard("bookmark", "Plan to Read", "31", "var(--sky)")}
+    ${statCard("pause.circle", "On Hold", "6", "var(--orange)")}
+    ${statCard("heart", "Favorites", "24", "var(--red)")}
+    ${statCard("eurosign.circle", "Total Value", "€1342.85")}
+    ${statCard("star", "Avg Rating", "8.4", "var(--orange)")}
+  </div>
+</div>`;
+MV.screen({
+  nav: { leading: icon("slider.horizontal.3", "navicon"), principal: wordmark(18), trailing: bell(3) },
+  tab: "home", moreBadge: 2, scroll: 0, content,
+});
+</script></body></html>

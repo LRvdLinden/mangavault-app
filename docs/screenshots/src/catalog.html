@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=390">
+<title>Catalog – CatalogView</title>
+<link rel="stylesheet" href="style.css"><script src="common.js"></script></head>
+<body><script>
+// CatalogView(mode: .catalog) (Views/Catalog/CatalogView.swift).
+// Filter "All": Shonen Jump titles first, sorted by title, then the rest.
+const { icon, cover, badge, chip, eventBanner, wordmark } = MV;
+const EVENT = {
+  accent: "#8B5CF6", title: "🎃 Spooky Season Reading Marathon",
+  subtitle: "Read horror & mystery manga all month and unlock the limited Halloween card.",
+  start: "2026-10-01", end: "2026-10-31", points: 340, max: 500, countdown: [15, 14, 18, 42],
+};
+const MANGA = [
+  { title: "Black Clover", sj: true, total: 36, price: 7.99 },
+  { title: "Bleach (3-in-1 Edition)", sj: true, omnibus: true, included: "Vols. 1-3", price: 17.99 },
+  { title: "Chainsaw Man", sj: true, total: 20, price: 8.99 },
+  { title: "Dandadan", sj: true, total: 19, price: 8.99 },
+  { title: "Jujutsu Kaisen", sj: true, total: 30, price: 8.99 },
+  { title: "Kagurabachi", sj: true, total: 7, price: 8.99 },
+];
+function mangaCard(m) {
+  let b = "";
+  if (m.omnibus) b = badge("3-IN-1", { icon: "books.vertical", fg: "var(--primary)", bg: "rgba(18,18,18,.8)", ring: "rgba(255,122,0,.5)" });
+  else if (m.sj) b = badge("SJ");
+  const sub = m.omnibus ? m.included : `${m.total} vols`;
+  return `<div class="vstack" style="gap:4px;min-width:0">
+    <div style="box-shadow:0 4px 8px rgba(0,0,0,.4);border-radius:10px">${cover({ ...m, publisher: "Shueisha", overlay: `<div class="ov-tr">${b}</div>` })}</div>
+    <div class="sub w7 nowrap">${m.title}</div>
+    <div class="hstack" style="gap:4px"><span class="c1 muted nowrap">${sub}</span><span class="spacer"></span><span class="c1 w7 pri">€${m.price.toFixed(2)}</span></div>
+  </div>`;
+}
+const filters = ["All", "Shonen Jump", "Kodansha", "Shogakukan", "Square Enix", "Kadokawa", "Shueisha", "Other"];
+const content = `<div class="vstack">
+  <div style="padding:12px 16px 0">${eventBanner(EVENT)}</div>
+  <div style="position:relative;border-bottom:1px solid rgba(255,122,0,.1);background:radial-gradient(circle 320px at 50% 0%, rgba(255,122,0,.35), rgba(255,122,0,0))">
+    <div class="vstack" style="gap:12px;padding:28px 16px">
+      <span class="lbl c1 w7 pri" style="align-self:flex-start;padding:5px 12px;border-radius:99px;background:rgba(255,122,0,.1);box-shadow:inset 0 0 0 1px rgba(255,122,0,.3)">${icon("flame.fill")}EVERY MANGA. EVERY LANGUAGE.</span>
+      <div style="font-size:36px;line-height:43px;font-weight:900;letter-spacing:-1.5px"><span class="fg">THE MANGA </span><span class="pri">VAULT</span></div>
+      <div class="sub muted">The full MangaDex catalog, in English. Open a title to add the individual volumes you own, track your reading, and total your collection's value.</div>
+    </div>
+  </div>
+  <div class="chiprow" style="padding:12px 16px;border-bottom:1px solid var(--border);background:rgba(18,18,18,.9)">${filters.map((f, i) => chip(f, i === 0)).join("")}</div>
+  <div style="padding:16px;display:grid;grid-template-columns:1fr 1fr;column-gap:14px;row-gap:20px">${MANGA.map(mangaCard).join("")}</div>
+</div>`;
+MV.screen({
+  nav: { principal: wordmark(18), trailing: icon("safari", "navicon") },
+  search: "Search manga...",
+  tab: "catalog", moreBadge: 2, scroll: 268, content,
+});
+</script></body></html>

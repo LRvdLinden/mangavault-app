@@ -121,7 +121,7 @@ body {
 .btn.primary { background: var(--primary); color: #fff; }
 .btn.secondary { background: var(--secondary); color: #fff; }
 .btn.outline { background: rgba(27, 27, 27, 0.4); border: 1px solid var(--border); color: var(--fg); }
-.btn.flex { flex: 1; }
+.btn.flex { flex: 1 1 0; min-width: 0; white-space: normal; text-align: center; line-height: 18px; padding: 0 12px; }
 
 .progress { position: relative; height: 8px; border-radius: 99px; background: var(--secondary); }
 .progress > i { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 99px; background: var(--primary); box-shadow: 0 0 6px rgba(255, 122, 0, 0.5); }
